@@ -10,9 +10,9 @@
 
 #include "toolbox_rev.h"
 
-UBYTE versiontag[] = VERSTAG;
+static UBYTE versiontag[] = VERSTAG;
 
-struct RDArgs *args;
+static struct RDArgs *args;
 
 enum {
 	ARG_DEVICE,
@@ -42,12 +42,12 @@ union toolbox {
 	} files;
 };
 
-UBYTE command[10];
-__aligned UBYTE data[sizeof(union toolbox)];
+static UBYTE command[10];
+static __aligned UBYTE data[sizeof(union toolbox)];
 
-union toolbox *toolbox = (union toolbox *)data;
+static union toolbox *toolbox = (union toolbox *)data;
 
-const char * const devicetypes[] = {
+static const char * const devicetypes[] = {
 	"Fixed",
 	"Removable",
 	"Optical",
