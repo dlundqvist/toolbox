@@ -1,0 +1,11 @@
+SCOPTIONS
+
+# KEEP IN SYNC WITH clean TARGET
+toolbox.gst
+toolbox.o
+toolbox.lnk
+toolbox
+toolbox.readme
+toolbox.guide
+toolbox.lha
+lha

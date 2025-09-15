@@ -1,0 +1,45 @@
+#include "toolbox_rev.h"
+#define MAKEVERSION_(V,R) V ## . ## R
+#define MAKEVERSION(V,R) MAKEVERSION_(V,R)
+@DATABASE toolbox
+@AUTHOR Daniel Lundqvist
+@$VER: toolbox.guide MAKEVERSION(VERSION,REVISION)
+@NODE "MAIN"
+    NAME
+	TOOLBOX - Communicate with SCSI emulator
+    FORMAT
+        DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
+	SCD=SETCD/N
+    FUNCTION
+	The DEVICE option specifies which device to open, and UNIT which unit
+	on that device. Defaults to scsi.device and 2 respectively.
+
+	The LISTDEVICES option lists all SCSI devices the SCSI emulator is
+	handling.
+
+	The LISTFILES option lists all files the SCSI emulator shares with
+	the host.
+
+	The LISTCDS option lists all CD image files that the SCSI emulator
+	can change to for the specified UNIT.
+
+	The SETCD option changes the emulator to use the specified CD image
+	index for for the specified UNIT.
+
+    EXAMPLES
+	1> TOOLBOX DEVICE scsi.device UNIT 2 LF
+	Index  Name                             Size      
+	--------------------------------------------------
+	0      AmigaTestKit.adf                 901120    
+	1      SysInfo.adf                      901120    
+
+	1> TOOLBOX LCD
+	Index  Name                             Size      
+	--------------------------------------------------
+	0      CygnusEd_Pro_5.iso               37969920  
+	1      RoadshowCD.iso                   31037440  
+	2      AmigaOS3.2CD.iso                 77899776  
+
+	1> TOOLBOX SETCD 2
+
+@ENDNODE MAIN

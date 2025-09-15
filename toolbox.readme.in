@@ -1,0 +1,14 @@
+#include "toolbox_rev.h"
+#define MAKEVERSION_(V,R) V ## . ## R
+#define MAKEVERSION(V,R) MAKEVERSION_(V,R)
+Short: Communicate with SCSI emulator
+Author: Daniel Lundqvist
+Uploader: daniel@malarhojden.nu (Daniel Lundqvist)
+Version: MAKEVERSION(VERSION,REVISION)
+Type: disk/misc
+Architecture: m68k-amigaos
+
+toolbox is a small utility to communicate with SCSI emulators,
+such as ZuluSCSI and BlueSCSI.
+
+See toolbox.guide for documentation.

@@ -1,0 +1,32 @@
+toolbox: toolbox.o
+	sc nover obj $< pname $@ link noicons
+
+toolbox.o: toolbox.c toolbox_rev.h toolbox.gst
+	sc nover cpu 68000 gst toolbox.gst csrc $< objname $@
+
+toolbox.readme: toolbox.readme.in toolbox_rev.h
+	sc nover pponly csrc $< objname $@
+
+toolbox.guide: toolbox.guide.in toolbox_rev.h
+	sc nover pponly csrc $< objname $@
+
+toolbox.gst: gst.c
+	sc nover mgst $@ csrc $< noobjname noicons
+
+clean:
+	-delete ALL toolbox.gst toolbox.o toolbox.lnk toolbox \
+                toolbox.readme toolbox.guide toolbox.lha lha
+
+toolbox.lha: toolbox toolbox.guide
+	-delete all toolbox.lha lha
+	makedir lha
+	makedir lha/toolbox
+	copy toolbox lha/toolbox/ CLONE
+	copy toolbox.guide lha/toolbox/ CLONE
+	lha -r a toolbox.lha lha/
+
+dist: toolbox.readme toolbox.lha
+
+backup: clean
+	- delete /toolbox.lha
+	lha a /toolbox.lha
