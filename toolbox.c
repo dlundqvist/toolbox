@@ -32,14 +32,12 @@ static struct MsgPort *msgport;
 static struct IOStdReq *ior;
 
 union toolbox {
-	struct {
-		struct toolbox_file {
-			UBYTE index;
-			UBYTE isdir;
-			char  name[33];
-			ULONG size;
-		} files[100];
-	} files;
+	struct toolbox_file {
+		UBYTE index;
+		UBYTE isdir;
+		char  name[33];
+		ULONG size;
+	} files[100];
 };
 
 static UBYTE command[10];
@@ -137,7 +135,7 @@ int main(void)
 		Printf("--------------------------------------------------\n");
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		for (i = 0; i < nfiles; i++) {
-			struct toolbox_file *f = &toolbox->files.files[i];
+			struct toolbox_file *f = &toolbox->files[i];
 			Printf("%-6ld %-32s %-10ld\n", f->index, f->name, f->size);
 		}
 	} else if (argsarray[ARG_LD]) {
