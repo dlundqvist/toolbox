@@ -32,6 +32,18 @@
 	SCSI emulator.
 
     EXAMPLES
+	1> TOOLBOX LISTDEVICES
+	ID  Type                            
+	------------------------------------
+	0   Not enabled                     
+	1   Fixed                           
+	2   Optical                         
+	3   Not enabled                     
+	4   Fixed                           
+	5   Fixed                           
+	6   Not enabled                     
+	7   Not enabled                     
+
 	1> TOOLBOX DEVICE scsi.device UNIT 2 LF
 	Index  Name                             Size      
 	--------------------------------------------------
