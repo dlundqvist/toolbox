@@ -7,9 +7,11 @@
 @NODE "MAIN"
     NAME
 	TOOLBOX - Communicate with SCSI emulator
+
     FORMAT
         DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
 	SCD=SETCD/N,GET
+
     FUNCTION
 	The DEVICE option specifies which device to open, and UNIT which unit
 	on that device. Defaults to scsi.device and 2 respectively.
