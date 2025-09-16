@@ -163,7 +163,7 @@ int main(void)
 			} else if (t == 255) {
 				s = "Not enabled";
 			} else {
-				s = "Unknown type";
+				s = "Unknown";
 			}
 			Printf("%-3ld %s (%ld)\n", i, s, t);
 		}
