@@ -9,7 +9,7 @@
 	TOOLBOX - Communicate with SCSI emulator
     FORMAT
         DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
-	SCD=SETCD/N
+	SCD=SETCD/N,GET
     FUNCTION
 	The DEVICE option specifies which device to open, and UNIT which unit
 	on that device. Defaults to scsi.device and 2 respectively.
@@ -26,6 +26,8 @@
 	The SETCD option changes the SCSI emulator to use the specified CD
 	image index for the specified UNIT.
 
+	The GET option downloads specified file that's being shared from the
+	SCSI emulator.
 
     EXAMPLES
 	1> TOOLBOX DEVICE scsi.device UNIT 2 LF
@@ -44,4 +46,8 @@
 	1> TOOLBOX SETCD 2
 
 	Changes active CD image
+
+	1> TOOLBOX GET SysInfo.adf
+	SysInfo.adf: Block 220/220
+
 @ENDNODE MAIN

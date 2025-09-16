@@ -21,6 +21,7 @@ enum {
 	ARG_LF,
 	ARG_LCD,
 	ARG_SCD,
+	ARG_GET,
 	ARG_NARG,
 };
 static LONG argsarray[ARG_NARG];
@@ -38,12 +39,15 @@ union toolbox {
 		char  name[33];
 		ULONG size;
 	} files[100];
+	UBYTE data[4096];
 };
 
 static UBYTE command[10];
 static __aligned UBYTE data[sizeof(union toolbox)];
 
 static union toolbox *toolbox = (union toolbox *)data;
+
+static BPTR file;
 
 static const char * const devicetypes[] = {
 	"Fixed",
@@ -66,7 +70,7 @@ int main(void)
 	argsarray[ARG_UNIT] = (LONG)&unit;
 
 	args = ReadArgs("DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,"
-			"LCD=LISTCDS/S,SCD=SETCD/N",
+			"LCD=LISTCDS/S,SCD=SETCD/N,GET",
 			argsarray, NULL);
 	if (args == NULL) {
 		PrintFault(IoErr(), "Unable to read arguments");
@@ -76,7 +80,8 @@ int main(void)
 	nactions = (argsarray[ARG_LD] != 0) +
 		   (argsarray[ARG_LF] != 0) +
 		   (argsarray[ARG_LCD] != 0) +
-		   (argsarray[ARG_SCD] != 0);
+		   (argsarray[ARG_SCD] != 0) +
+		   (argsarray[ARG_GET] != 0);
 	if (nactions == 0) {
 		Printf("Must specify an action\n");
 		return 1;
@@ -117,6 +122,8 @@ int main(void)
 	} else if (argsarray[ARG_SCD]) {
 		command[0] = 0xD8;
 		command[1] = (UBYTE)*(LONG *)argsarray[ARG_SCD];
+	} else if (argsarray[ARG_GET]) {
+		command[0] = 0xD0;
 	}
 	scsicmd.scsi_Command = command;
 	scsicmd.scsi_CmdLength = sizeof(command);
@@ -155,6 +162,60 @@ int main(void)
 			}
 			Printf("%-2ld %s (%ld)\n", i, s, t);
 		}
+	} else if (argsarray[ARG_GET]) {
+		ULONG i, nfiles;
+		ULONG nblocks;
+		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+		for (i = 0; i < nfiles; i++) {
+			struct toolbox_file *f = &toolbox->files[i];
+			if (!strcmp((const char *)argsarray[ARG_GET],
+				    f->name)) {
+				break;
+			}
+		}
+		if (i == nfiles) {
+			Printf("File \"%s\" not found\n",
+			       (const char *)argsarray[ARG_GET]);
+			return 1;
+		}
+
+		file = Open((const char *)argsarray[ARG_GET], MODE_NEWFILE);
+		if (file == NULL) {
+			PrintFault(IoErr(),
+				   "Unable to open file for writing");
+			return 1;
+		}
+
+		nblocks = (toolbox->files[i].size / 4096) +
+			  (toolbox->files[i].size % 4096 ? 1 : 0);
+
+		command[0] = 0xD1;
+		command[1] = i;
+
+		for (i = 0; i < nblocks; i++) {
+			ULONG actual;
+			memcpy(&command[2], &i, 4);
+			if (DoIO((struct IORequest *)ior)) {
+				Printf("Unable to send IO request: %ld\n",
+				       ior->io_Error);
+				return 1;
+			}
+
+			Printf("%s%s: Block %ld/%ld", i ? "\xd" : "",
+			       (const char *)argsarray[ARG_GET],
+			       i + 1, nblocks);
+
+			actual = scsicmd.scsi_Actual;
+			if (Write(file, toolbox->data, actual) != actual) {
+				PrintFault(IoErr(),
+					   "\nUnable to write to file");
+				Close(file);
+				file = NULL;
+				DeleteFile((const char *)argsarray[ARG_GET]);
+				return 1;
+			}
+		}
+		Printf("\n");
 	}
 
 	return 0;
@@ -162,6 +223,9 @@ int main(void)
 
 void _STD_cleanup(void)
 {
+	if (file)
+		Close(file);
+
 	if (ior) {
 		if (ior->io_Device)
 			CloseDevice((struct IORequest *)ior);
