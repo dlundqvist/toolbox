@@ -2,7 +2,7 @@
 #define MAKEVERSION_(V,R) V ## . ## R
 #define MAKEVERSION(V,R) MAKEVERSION_(V,R)
 Short: Communicate with SCSI emulator
-Author: Daniel Lundqvist
+Author: daniel@malarhojden.nu (Daniel Lundqvist)
 Uploader: daniel@malarhojden.nu (Daniel Lundqvist)
 Version: MAKEVERSION(VERSION,REVISION)
 Type: disk/misc
