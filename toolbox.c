@@ -87,7 +87,7 @@ int main(void)
 		return 1;
 	}
 	if (nactions != 1) {
-		Printf("Must only specify one action\n");
+		Printf("Must specify at most one action\n");
 		return 1;
 	}
 
