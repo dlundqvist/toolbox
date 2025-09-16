@@ -165,7 +165,7 @@ int main(void)
 			} else {
 				s = "Unknown";
 			}
-			Printf("%-3ld %s (%ld)\n", i, s, t);
+			Printf("%-3ld %s\n", i, s);
 		}
 	} else if (argsarray[ARG_GET]) {
 		ULONG i, nfiles;
