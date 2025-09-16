@@ -86,8 +86,8 @@ int main(void)
 		return 1;
 	}
 
-	device = (const char *)argsarray[0];
-	unit = *(LONG *)argsarray[1];
+	device = (const char *)argsarray[ARG_DEVICE];
+	unit = *(LONG *)argsarray[ARG_UNIT];
 
 	msgport = CreateMsgPort();
 	if (msgport == NULL) {
