@@ -43,4 +43,5 @@
 
 	1> TOOLBOX SETCD 2
 
+	Changes active CD image
 @ENDNODE MAIN
