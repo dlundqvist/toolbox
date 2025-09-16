@@ -23,8 +23,9 @@
 	The LISTCDS option lists all CD image files that the SCSI emulator
 	can change to for the specified UNIT.
 
-	The SETCD option changes the emulator to use the specified CD image
-	index for for the specified UNIT.
+	The SETCD option changes the SCSI emulator to use the specified CD
+	image index for the specified UNIT.
+
 
     EXAMPLES
 	1> TOOLBOX DEVICE scsi.device UNIT 2 LF
