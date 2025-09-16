@@ -136,7 +136,8 @@ int main(void)
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &toolbox->files[i];
-			Printf("%-6ld %-32s %-10ld\n", f->index, f->name, f->size);
+			Printf("%-6ld %-32s %-10ld\n",
+			       f->index, f->name, f->size);
 		}
 	} else if (argsarray[ARG_LD]) {
 		int i;
