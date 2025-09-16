@@ -66,6 +66,11 @@ int main(void)
 	struct SCSICmd scsicmd;
 	int nactions;
 
+	if (DOSBase->dl_lib.lib_Version < 36) {
+		Printf("dos.library v36 or later is required\n");
+		return 1;
+	}
+
 	argsarray[ARG_DEVICE] = (LONG)device;
 	argsarray[ARG_UNIT] = (LONG)&unit;
 
