@@ -156,7 +156,7 @@ int main(void)
 		Printf("%-3s %-32s\n", "ID", "Type");
 		Printf("------------------------------------\n");
 		for (i = 0; i < scsicmd.scsi_Actual; i++) {
-			UBYTE t = scsicmd.scsi_Data[i];
+			UBYTE t = toolbox->data[i];
 			const char *s;
 			if (t < sizeof(devicetypes)/sizeof(devicetypes[0])) {
 				s = devicetypes[t];
