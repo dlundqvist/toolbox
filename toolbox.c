@@ -32,7 +32,7 @@ static LONG unit = 2;
 static struct MsgPort *msgport;
 static struct IOStdReq *ior;
 
-union toolbox {
+__aligned union {
 	struct toolbox_file {
 		UBYTE index;
 		UBYTE isdir;
@@ -40,12 +40,9 @@ union toolbox {
 		ULONG size;
 	} files[100];
 	UBYTE data[4096];
-};
+} data;
 
 static UBYTE command[10];
-static __aligned UBYTE data[sizeof(union toolbox)];
-
-static union toolbox *toolbox = (union toolbox *)data;
 
 static BPTR file;
 
@@ -132,7 +129,7 @@ int main(void)
 	}
 	scsicmd.scsi_Command = command;
 	scsicmd.scsi_CmdLength = sizeof(command);
-	scsicmd.scsi_Data = (UWORD *)data;
+	scsicmd.scsi_Data = (UWORD *)&data;
 	scsicmd.scsi_Length = sizeof(data);
 	scsicmd.scsi_Flags = SCSIF_READ;
 
@@ -147,7 +144,7 @@ int main(void)
 		Printf("--------------------------------------------------\n");
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		for (i = 0; i < nfiles; i++) {
-			struct toolbox_file *f = &toolbox->files[i];
+			struct toolbox_file *f = &data.files[i];
 			Printf("%-6ld %-32s %-10ld\n",
 			       f->index, f->name, f->size);
 		}
@@ -156,7 +153,7 @@ int main(void)
 		Printf("%-3s %-32s\n", "ID", "Type");
 		Printf("------------------------------------\n");
 		for (i = 0; i < scsicmd.scsi_Actual; i++) {
-			UBYTE t = toolbox->data[i];
+			UBYTE t = data.data[i];
 			const char *s;
 			if (t < sizeof(devicetypes)/sizeof(devicetypes[0])) {
 				s = devicetypes[t];
@@ -172,7 +169,7 @@ int main(void)
 		ULONG nblocks;
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		for (i = 0; i < nfiles; i++) {
-			struct toolbox_file *f = &toolbox->files[i];
+			struct toolbox_file *f = &data.files[i];
 			if (!strcmp((const char *)argsarray[ARG_GET],
 				    f->name)) {
 				break;
@@ -191,8 +188,8 @@ int main(void)
 			return 1;
 		}
 
-		nblocks = (toolbox->files[i].size / 4096) +
-			  (toolbox->files[i].size % 4096 ? 1 : 0);
+		nblocks = (data.files[i].size / 4096) +
+			  (data.files[i].size % 4096 ? 1 : 0);
 
 		command[0] = 0xD1;
 		command[1] = i;
@@ -211,7 +208,7 @@ int main(void)
 			       i + 1, nblocks);
 
 			actual = scsicmd.scsi_Actual;
-			if (Write(file, toolbox->data, actual) != actual) {
+			if (Write(file, data.data, actual) != actual) {
 				PrintFault(IoErr(),
 					   "\nUnable to write to file");
 				Close(file);
