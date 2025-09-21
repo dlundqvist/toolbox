@@ -13,6 +13,8 @@ such as ZuluSCSI and BlueSCSI.
 
 See toolbox.guide for documentation.
 
+Source is available at https://github.com/dlundqvist/toolbox.
+
 Release 0.2
 -----------
 	- Fix reading data for LISTDEVICES action.
