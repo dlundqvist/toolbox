@@ -12,3 +12,12 @@ toolbox is a small utility to communicate with SCSI emulators,
 such as ZuluSCSI and BlueSCSI.
 
 See toolbox.guide for documentation.
+
+Release 0.2
+-----------
+	- Fix reading data for LISTDEVICES action.
+	- Adjust and correct output for LISTDEVICES action.
+
+Release 0.1
+-----------
+	- First release.
