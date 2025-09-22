@@ -2,7 +2,7 @@ toolbox: toolbox.o
 	sc nover obj $< pname $@ link noicons
 
 toolbox.o: toolbox.c toolbox_rev.h toolbox.gst
-	sc nover cpu 68000 gst toolbox.gst csrc $< objname $@
+	sc nover gst toolbox.gst csrc $< objname $@
 
 toolbox.readme: toolbox.readme.in toolbox_rev.h
 	sc nover pponly csrc $< objname $@
