@@ -29,7 +29,7 @@
 	image index for the specified UNIT.
 
 	The GET option downloads specified file that's being shared from the
-	SCSI emulator.
+	SCSI emulator. File can include path where the file will be written.
 
     EXAMPLES
 	1> TOOLBOX LISTDEVICES
@@ -63,5 +63,8 @@
 
 	1> TOOLBOX GET SysInfo.adf
 	SysInfo.adf: Block 220/220
+
+	1> TOOLBOX GET /AmigaTestKit.adf
+	/AmigaTestKit.adf: Block 220/220
 
 @ENDNODE MAIN

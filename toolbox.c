@@ -167,17 +167,17 @@ int main(void)
 	} else if (argsarray[ARG_GET]) {
 		ULONG i, nfiles;
 		ULONG nblocks;
+		const char *fpart;
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+		fpart = FilePart((const char *)argsarray[ARG_GET]);
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
-			if (!strcmp((const char *)argsarray[ARG_GET],
-				    f->name)) {
+			if (!strcmp(fpart, f->name)) {
 				break;
 			}
 		}
 		if (i == nfiles) {
-			Printf("File \"%s\" not found\n",
-			       (const char *)argsarray[ARG_GET]);
+			Printf("File \"%s\" not found\n", fpart);
 			return 1;
 		}
 
