@@ -93,6 +93,17 @@ int main(void)
 		return 1;
 	}
 
+	if (!*(const char *)argsarray[ARG_DEVICE]) {
+		Printf("DEVICE must not be empty\n");
+		return 1;
+	}
+
+	if (argsarray[ARG_GET] &&
+	    !*(const char *)argsarray[ARG_GET]) {
+		Printf("GET must not be empty\n");
+		return 1;
+	}
+
 	device = (const char *)argsarray[ARG_DEVICE];
 	unit = *(LONG *)argsarray[ARG_UNIT];
 

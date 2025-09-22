@@ -18,6 +18,7 @@ Source is available at https://github.com/dlundqvist/toolbox.
 Release 0.3
 -----------
 	- Support for path in GET action.
+	- Better validation of command line arguments.
 
 Release 0.2
 -----------
