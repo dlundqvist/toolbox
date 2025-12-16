@@ -44,10 +44,10 @@
 	7   Not enabled                     
 
 	1> TOOLBOX DEVICE scsi.device UNIT 2 LF
-	Index  Name                             Size      
-	--------------------------------------------------
-	0      AmigaTestKit.adf                 901120    
-	1      SysInfo.adf                      901120    
+	Name                             Size      
+	-------------------------------------------
+	AmigaTestKit.adf                 901120    
+	SysInfo.adf                      901120    
 
 	1> TOOLBOX LCD
 	Index  Name                             Size      

@@ -150,7 +150,16 @@ int main(void)
 		return 1;
 	}
 
-	if (argsarray[ARG_LF] || argsarray[ARG_LCD]) {
+	if (argsarray[ARG_LF]) {
+		int i, nfiles;
+		Printf("%-32s %-10s\n", "Name", "Size");
+		Printf("-------------------------------------------\n");
+		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+		for (i = 0; i < nfiles; i++) {
+			struct toolbox_file *f = &data.files[i];
+			Printf("%-32s %-10ld\n", f->name, f->size);
+		}
+	} else if (argsarray[ARG_LCD]) {
 		int i, nfiles;
 		Printf("%-6s %-32s %-10s\n", "Index", "Name", "Size");
 		Printf("--------------------------------------------------\n");

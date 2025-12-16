@@ -18,6 +18,7 @@ Release 0.3
 	- Support for path in GET action.
 	- Better validation of command line arguments.
 	- Documentation updates/adjustments.
+	- Adjust output for LISTFILES action (dropped Index column).
 
 Release 0.2
 -----------
