@@ -19,6 +19,7 @@ Release 0.3
 	- Better validation of command line arguments.
 	- Documentation updates/adjustments.
 	- Adjust output for LISTFILES action (dropped Index column).
+	- CD index in LISTCDS and SETCD actions start with 1 instead of 0.
 
 Release 0.2
 -----------

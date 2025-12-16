@@ -105,6 +105,12 @@ int main(void)
 		return 1;
 	}
 
+	if (argsarray[ARG_SCD] &&
+			!(UBYTE)*(LONG *)argsarray[ARG_SCD]) {
+		Printf("SETCD index must be greater than 0\n");
+		return 1;
+	}
+
 	device = (const char *)argsarray[ARG_DEVICE];
 	unit = *(LONG *)argsarray[ARG_UNIT];
 
@@ -135,7 +141,7 @@ int main(void)
 		command[0] = 0xD7;
 	} else if (argsarray[ARG_SCD]) {
 		command[0] = 0xD8;
-		command[1] = (UBYTE)*(LONG *)argsarray[ARG_SCD];
+		command[1] = (UBYTE)*(LONG *)argsarray[ARG_SCD] - 1;
 	} else if (argsarray[ARG_GET]) {
 		command[0] = 0xD0;
 	}
@@ -167,7 +173,7 @@ int main(void)
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
 			Printf("%-6ld %-32s %-10ld\n",
-			       f->index, f->name, f->size);
+			       f->index + 1, f->name, f->size);
 		}
 	} else if (argsarray[ARG_LD]) {
 		int i;

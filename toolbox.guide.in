@@ -52,9 +52,9 @@
 	1> TOOLBOX LCD
 	Index  Name                             Size      
 	--------------------------------------------------
-	0      CygnusEd_Pro_5.iso               37969920  
-	1      RoadshowCD.iso                   31037440  
-	2      AmigaOS3.2CD.iso                 77899776  
+	1      CygnusEd_Pro_5.iso               37969920  
+	2      RoadshowCD.iso                   31037440  
+	3      AmigaOS3.2CD.iso                 77899776  
 
 	1> TOOLBOX SETCD 2
 
