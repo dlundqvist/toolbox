@@ -1,6 +1,6 @@
-# toolbox - Utility to communicate with SCSI emulators
+# toolbox - Utility to communicate with SCSI emulator
 
-Small utility to list shared files, CD images, change CD etc.
+Utility to list shared files, CD images, change CD etc.
 
 ## Requirements
 

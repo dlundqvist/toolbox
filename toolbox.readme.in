@@ -8,8 +8,8 @@ Version: MAKEVERSION(VERSION,REVISION)
 Type: disk/misc
 Architecture: m68k-amigaos >= 2.x
 
-toolbox is a small utility to communicate with SCSI emulators,
-such as ZuluSCSI and BlueSCSI.
+toolbox is a utility to communicate with SCSI emulators, such as ZuluSCSI
+and BlueSCSI.
 
 See toolbox.guide for documentation.
 
