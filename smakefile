@@ -1,13 +1,15 @@
+TOOLBOX_DEPS=toolbox_version.h toolbox_rev.h
+
 toolbox: toolbox.o
 	sc nover obj $< pname $@ link noicons
 
-toolbox.o: toolbox.c toolbox_version.h toolbox_rev.h toolbox.gst
+toolbox.o: toolbox.c $(TOOLBOX_DEPS) toolbox.gst
 	sc nover gst toolbox.gst csrc $< objname $@
 
-toolbox.readme: toolbox.readme.in toolbox_version.h toolbox_rev.h
+toolbox.readme: toolbox.readme.in $(TOOLBOX_DEPS)
 	sc nover pponly csrc $< objname $@
 
-toolbox.guide: toolbox.guide.in toolbox_version.h toolbox_rev.h
+toolbox.guide: toolbox.guide.in $(TOOLBOX_DEPS)
 	sc nover pponly csrc $< objname $@
 
 toolbox.gst: gst.c
