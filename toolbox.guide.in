@@ -1,6 +1,4 @@
-#include "toolbox_rev.h"
-#define MAKEVERSION_(V,R) V ## . ## R
-#define MAKEVERSION(V,R) MAKEVERSION_(V,R)
+#include "toolbox_version.h"
 @DATABASE toolbox
 @AUTHOR Daniel Lundqvist
 @$VER: toolbox.guide MAKEVERSION(VERSION,REVISION)

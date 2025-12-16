@@ -1,3 +1,4 @@
+/* :ts=2 */
 #include <devices/scsidisk.h>
 
 #include <exec/exec.h>
@@ -8,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "toolbox_rev.h"
+#include "toolbox_version.h"
 
 static UBYTE versiontag[] = VERSTAG;
 
