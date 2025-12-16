@@ -1,7 +1,7 @@
 #include "toolbox_rev.h"
 #define MAKEVERSION_(V,R) V ## . ## R
 #define MAKEVERSION(V,R) MAKEVERSION_(V,R)
-Short: Communicate with SCSI emulator
+Short: Utility to communicate with SCSI emulator
 Author: daniel@malarhojden.nu (Daniel Lundqvist)
 Uploader: daniel@malarhojden.nu (Daniel Lundqvist)
 Version: MAKEVERSION(VERSION,REVISION)
