@@ -19,6 +19,7 @@ Release 0.3
 -----------
 	- Support for path in GET action.
 	- Better validation of command line arguments.
+	- Documentation updates/adjustments.
 
 Release 0.2
 -----------
