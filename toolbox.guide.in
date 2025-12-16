@@ -13,8 +13,8 @@
 	SCD=SETCD/N,GET
 
     FUNCTION
-	The DEVICE option specifies which device to open, and UNIT which unit
-	on that device. Defaults to scsi.device and 2 respectively.
+	The DEVICE option specifies which device to open, and UNIT which
+	unit on that device. Defaults to scsi.device and 2 respectively.
 
 	The LISTDEVICES option lists all SCSI devices the SCSI emulator is
 	handling.
@@ -28,8 +28,9 @@
 	The SETCD option changes the SCSI emulator to use the specified CD
 	image index for the specified UNIT.
 
-	The GET option downloads specified file that's being shared from the
-	SCSI emulator. File can include path where the file will be written.
+	The GET option downloads specified file that's being shared from
+	the SCSI emulator. File can include path where the file will be
+	written.
 
     EXAMPLES
 	1> TOOLBOX LISTDEVICES

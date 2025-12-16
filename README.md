@@ -8,5 +8,5 @@ AmigaOS 2.x and 68000 with a SCSI emulator, such as ZuluSCSI or BlueSCSI.
 
 ## Build
 
-This is developed using SAS/C and NDK 3.2r4. Typing "smake" should be enough
-to build the program.
+This is developed using SAS/C and NDK 3.2r4. Typing "smake" should be
+enough to build the program.
