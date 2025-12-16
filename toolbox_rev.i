@@ -1,18 +1,18 @@
 VERSION		EQU	0
-REVISION	EQU	2
+REVISION	EQU	3
 
 DATE	MACRO
-		dc.b '21.9.2025'
+		dc.b '16.12.2025'
 		ENDM
 
 VERS	MACRO
-		dc.b 'toolbox 0.2'
+		dc.b 'toolbox 0.3'
 		ENDM
 
 VSTRING	MACRO
-		dc.b 'toolbox 0.2 (21.9.2025)',13,10,0
+		dc.b 'toolbox 0.3 (16.12.2025)',13,10,0
 		ENDM
 
 VERSTAG	MACRO
-		dc.b 0,'$VER: toolbox 0.2 (21.9.2025)',0
+		dc.b 0,'$VER: toolbox 0.3 (16.12.2025)',0
 		ENDM
