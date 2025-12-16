@@ -4,7 +4,7 @@
 @DATABASE toolbox
 @AUTHOR Daniel Lundqvist
 @$VER: toolbox.guide MAKEVERSION(VERSION,REVISION)
-@NODE "MAIN"
+@NODE MAIN
     NAME
 	TOOLBOX - Utility to communicate with SCSI emulator
 
