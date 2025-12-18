@@ -1,4 +1,4 @@
-# toolbox - Utility to communicate with SCSI emulator
+# toolbox - Utility for SCSI emulators
 
 Utility to list shared files, CD images, change CD etc.
 

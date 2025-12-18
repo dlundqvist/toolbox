@@ -1,13 +1,12 @@
 #include "toolbox_version.h"
-Short: Utility to communicate with SCSI emulator
+Short: Utility for SCSI emulators
 Author: daniel@malarhojden.nu (Daniel Lundqvist)
 Uploader: daniel@malarhojden.nu (Daniel Lundqvist)
 Version: MAKEVERSION(VERSION,REVISION)
 Type: disk/misc
 Architecture: m68k-amigaos >= 2.x
 
-toolbox is a utility to communicate with SCSI emulators, such as ZuluSCSI
-and BlueSCSI.
+toolbox is a utility for SCSI emulators, such as ZuluSCSI and BlueSCSI.
 
 See toolbox.guide for documentation.
 

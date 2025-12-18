@@ -4,7 +4,7 @@
 @$VER: toolbox.guide MAKEVERSION(VERSION,REVISION)
 @NODE MAIN
     NAME
-	TOOLBOX - Utility to communicate with SCSI emulator
+	TOOLBOX - Utility for SCSI emulators
 
     FORMAT
         DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
