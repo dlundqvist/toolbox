@@ -66,7 +66,7 @@ int main(void)
 
 	if (DOSBase->dl_lib.lib_Version < 36) {
 		Printf("dos.library v36 or later is required\n");
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	argsarray[ARG_DEVICE] = (LONG)device;
@@ -77,7 +77,7 @@ int main(void)
 			argsarray, NULL);
 	if (args == NULL) {
 		PrintFault(IoErr(), "Unable to read arguments");
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	nactions = (argsarray[ARG_LD] != 0) +
@@ -87,28 +87,28 @@ int main(void)
 		   (argsarray[ARG_GET] != 0);
 	if (nactions == 0) {
 		Printf("Must specify an action\n");
-		return 1;
+		return RETURN_ERROR;
 	}
 	if (nactions != 1) {
 		Printf("Must specify at most one action\n");
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	if (!*(const char *)argsarray[ARG_DEVICE]) {
 		Printf("DEVICE must not be empty\n");
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	if (argsarray[ARG_GET] &&
 	    !*(const char *)argsarray[ARG_GET]) {
 		Printf("GET must not be empty\n");
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	if (argsarray[ARG_SCD] &&
 			!(UBYTE)*(LONG *)argsarray[ARG_SCD]) {
 		Printf("SETCD index must be greater than 0\n");
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	device = (const char *)argsarray[ARG_DEVICE];
@@ -117,17 +117,17 @@ int main(void)
 	msgport = CreateMsgPort();
 	if (msgport == NULL) {
 		Printf("Unable to create message port\n");
-		return 1;
+		return RETURN_ERROR;
 	}
 	ior = (struct IOStdReq *)CreateIORequest(msgport, sizeof(*ior));
 	if (ior == NULL) {
 		Printf("Unable to create IO request\n");
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	if(OpenDevice(device, unit, (struct IORequest *)ior, 0L)) {
 		Printf("Unable to open device %s unit %ld\n", device, unit);
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	ior->io_Command = HD_SCSICMD;
@@ -153,7 +153,7 @@ int main(void)
 
 	if (DoIO((struct IORequest *)ior)) {
 		Printf("Unable to send IO request: %ld\n", ior->io_Error);
-		return 1;
+		return RETURN_ERROR;
 	}
 
 	if (argsarray[ARG_LF]) {
@@ -205,14 +205,14 @@ int main(void)
 		}
 		if (i == nfiles) {
 			Printf("File \"%s\" not found\n", fpart);
-			return 1;
+			return RETURN_ERROR;
 		}
 
 		file = Open((const char *)argsarray[ARG_GET], MODE_NEWFILE);
 		if (file == NULL) {
 			PrintFault(IoErr(),
 				   "Unable to open file for writing");
-			return 1;
+			return RETURN_ERROR;
 		}
 
 		nblocks = (data.files[i].size / 4096) +
@@ -227,7 +227,7 @@ int main(void)
 			if (DoIO((struct IORequest *)ior)) {
 				Printf("Unable to send IO request: %ld\n",
 				       ior->io_Error);
-				return 1;
+				return RETURN_ERROR;
 			}
 
 			Printf("%s%s: Block %ld/%ld", i ? "\xd" : "",
@@ -241,13 +241,13 @@ int main(void)
 				Close(file);
 				file = NULL;
 				DeleteFile((const char *)argsarray[ARG_GET]);
-				return 1;
+				return RETURN_ERROR;
 			}
 		}
 		Printf("\n");
 	}
 
-	return 0;
+	return RETURN_OK;
 }
 
 void _STD_cleanup(void)
