@@ -1,6 +1,7 @@
 /* :ts=2 */
 #include <devices/scsidisk.h>
 
+#include <dos/dos.h>
 #include <exec/exec.h>
 
 #include <proto/dos.h>
