@@ -58,7 +58,6 @@ static const char * const devicetypes[] = {
 	"ZIP100",
 };
 
-
 int main(void)
 {
 	struct SCSICmd scsicmd;
@@ -75,6 +74,7 @@ int main(void)
 	args = ReadArgs("DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,"
 			"LCD=LISTCDS/S,SCD=SETCD/N,GET",
 			argsarray, NULL);
+
 	if (args == NULL) {
 		PrintFault(IoErr(), "Unable to read arguments");
 		return RETURN_ERROR;
@@ -85,10 +85,12 @@ int main(void)
 		   (argsarray[ARG_LCD] != 0) +
 		   (argsarray[ARG_SCD] != 0) +
 		   (argsarray[ARG_GET] != 0);
+
 	if (nactions == 0) {
 		Printf("Must specify an action\n");
 		return RETURN_ERROR;
 	}
+
 	if (nactions != 1) {
 		Printf("Must specify at most one action\n");
 		return RETURN_ERROR;
@@ -115,11 +117,14 @@ int main(void)
 	unit = *(LONG *)argsarray[ARG_UNIT];
 
 	msgport = CreateMsgPort();
+
 	if (msgport == NULL) {
 		Printf("Unable to create message port\n");
 		return RETURN_ERROR;
 	}
+
 	ior = (struct IOStdReq *)CreateIORequest(msgport, sizeof(*ior));
+
 	if (ior == NULL) {
 		Printf("Unable to create IO request\n");
 		return RETURN_ERROR;
@@ -133,6 +138,7 @@ int main(void)
 	ior->io_Command = HD_SCSICMD;
 	ior->io_Data = &scsicmd;
 	ior->io_Length = sizeof(scsicmd);
+
 	if (argsarray[ARG_LD]) {
 		command[0] = 0xD9;
 	} else if (argsarray[ARG_LF]) {
@@ -145,6 +151,7 @@ int main(void)
 	} else if (argsarray[ARG_GET]) {
 		command[0] = 0xD0;
 	}
+
 	scsicmd.scsi_Command = command;
 	scsicmd.scsi_CmdLength = sizeof(command);
 	scsicmd.scsi_Data = (UWORD *)&data;
@@ -158,30 +165,41 @@ int main(void)
 
 	if (argsarray[ARG_LF]) {
 		int i, nfiles;
+
 		Printf("%-32s %-10s\n", "Name", "Size");
 		Printf("-------------------------------------------\n");
+
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
+
 			Printf("%-32s %-10ld\n", f->name, f->size);
 		}
 	} else if (argsarray[ARG_LCD]) {
 		int i, nfiles;
+
 		Printf("%-6s %-32s %-10s\n", "Index", "Name", "Size");
 		Printf("--------------------------------------------------\n");
+
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
+
 			Printf("%-6ld %-32s %-10ld\n",
 			       f->index + 1, f->name, f->size);
 		}
 	} else if (argsarray[ARG_LD]) {
 		int i;
+
 		Printf("%-3s %-32s\n", "ID", "Type");
 		Printf("------------------------------------\n");
+
 		for (i = 0; i < scsicmd.scsi_Actual; i++) {
 			UBYTE t = data.data[i];
 			const char *s;
+
 			if (t < sizeof(devicetypes)/sizeof(devicetypes[0])) {
 				s = devicetypes[t];
 			} else if (t == 255) {
@@ -189,26 +207,32 @@ int main(void)
 			} else {
 				s = "Unknown";
 			}
+
 			Printf("%-3ld %-32s\n", i, s);
 		}
 	} else if (argsarray[ARG_GET]) {
 		ULONG i, nfiles;
 		ULONG nblocks;
 		const char *fpart;
+
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		fpart = FilePart((const char *)argsarray[ARG_GET]);
+
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
+
 			if (!strcmp(fpart, f->name)) {
 				break;
 			}
 		}
+
 		if (i == nfiles) {
 			Printf("File \"%s\" not found\n", fpart);
 			return RETURN_ERROR;
 		}
 
 		file = Open((const char *)argsarray[ARG_GET], MODE_NEWFILE);
+
 		if (file == NULL) {
 			PrintFault(IoErr(),
 				   "Unable to open file for writing");
@@ -223,7 +247,9 @@ int main(void)
 
 		for (i = 0; i < nblocks; i++) {
 			ULONG actual;
+
 			memcpy(&command[2], &i, 4);
+
 			if (DoIO((struct IORequest *)ior)) {
 				Printf("Unable to send IO request: %ld\n",
 				       ior->io_Error);
@@ -235,6 +261,7 @@ int main(void)
 			       i + 1, nblocks);
 
 			actual = scsicmd.scsi_Actual;
+
 			if (Write(file, data.data, actual) != actual) {
 				PrintFault(IoErr(),
 					   "\nUnable to write to file");
