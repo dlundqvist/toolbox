@@ -164,12 +164,11 @@ int main(void)
 	}
 
 	if (argsarray[ARG_LF]) {
-		int i, nfiles;
+		int nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+		int i;
 
 		Printf("%-32s %-10s\n", "Name", "Size");
 		Printf("-------------------------------------------\n");
-
-		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
@@ -177,12 +176,11 @@ int main(void)
 			Printf("%-32s %-10ld\n", f->name, f->size);
 		}
 	} else if (argsarray[ARG_LCD]) {
-		int i, nfiles;
+		int nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+		int i;
 
 		Printf("%-6s %-32s %-10s\n", "Index", "Name", "Size");
 		Printf("--------------------------------------------------\n");
-
-		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
@@ -211,12 +209,10 @@ int main(void)
 			Printf("%-3ld %-32s\n", i, s);
 		}
 	} else if (argsarray[ARG_GET]) {
-		ULONG i, nfiles;
+		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+		const char *fpart = FilePart((const char *)argsarray[ARG_GET]);
+		ULONG i;
 		ULONG nblocks;
-		const char *fpart;
-
-		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
-		fpart = FilePart((const char *)argsarray[ARG_GET]);
 
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
@@ -234,8 +230,7 @@ int main(void)
 		file = Open((const char *)argsarray[ARG_GET], MODE_NEWFILE);
 
 		if (file == NULL) {
-			PrintFault(IoErr(),
-				   "Unable to open file for writing");
+			PrintFault(IoErr(), "Unable to open file for writing");
 			return RETURN_ERROR;
 		}
 
@@ -263,8 +258,7 @@ int main(void)
 			actual = scsicmd.scsi_Actual;
 
 			if (Write(file, data.data, actual) != actual) {
-				PrintFault(IoErr(),
-					   "\nUnable to write to file");
+				PrintFault(IoErr(), "\nUnable to write to file");
 				Close(file);
 				file = NULL;
 				DeleteFile((const char *)argsarray[ARG_GET]);
