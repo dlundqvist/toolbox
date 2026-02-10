@@ -4,7 +4,7 @@ Author: daniel@malarhojden.nu (Daniel Lundqvist)
 Uploader: daniel@malarhojden.nu (Daniel Lundqvist)
 Version: MAKEVERSION(VERSION,REVISION)
 Type: disk/misc
-Architecture: m68k-amigaos >= 2.x
+Architecture: m68k-amigaos >= 2.04
 
 toolbox is a utility for SCSI emulators, such as ZuluSCSI and BlueSCSI.
 
