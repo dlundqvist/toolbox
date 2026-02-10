@@ -12,6 +12,10 @@ See toolbox.guide for documentation.
 
 Source is available at https://github.com/dlundqvist/toolbox.
 
+Release 0.4
+-----------
+	- Fix return code in case of errors.
+
 Release 0.3
 -----------
 	- Support for path in GET action.
