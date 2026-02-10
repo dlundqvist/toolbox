@@ -164,8 +164,8 @@ int main(void)
 	}
 
 	if (argsarray[ARG_LF]) {
-		int nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
-		int i;
+		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+		ULONG i;
 
 		Printf("%-32s %-10s\n", "Name", "Size");
 		Printf("-------------------------------------------\n");
@@ -176,8 +176,8 @@ int main(void)
 			Printf("%-32s %-10ld\n", f->name, f->size);
 		}
 	} else if (argsarray[ARG_LCD]) {
-		int nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
-		int i;
+		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
+		ULONG i;
 
 		Printf("%-6s %-32s %-10s\n", "Index", "Name", "Size");
 		Printf("--------------------------------------------------\n");
@@ -189,7 +189,7 @@ int main(void)
 			       f->index + 1, f->name, f->size);
 		}
 	} else if (argsarray[ARG_LD]) {
-		int i;
+		ULONG i;
 
 		Printf("%-3s %-32s\n", "ID", "Type");
 		Printf("------------------------------------\n");
