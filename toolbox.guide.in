@@ -8,7 +8,7 @@
 
     FORMAT
         DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
-	SCD=SETCD/N,GET
+	SCD=SETCD/N,GET,W=WIFI/S
 
     FUNCTION
 	The DEVICE option specifies which device to open, and UNIT which
@@ -30,6 +30,9 @@
 	the SCSI emulator. File can include path where the file will be
 	written.
 
+	The WIFI option show information about the currently connected WiFi
+	network.
+
     EXAMPLES
 	1> TOOLBOX LISTDEVICES
 	ID  Type                            
@@ -38,7 +41,7 @@
 	1   Fixed                           
 	2   Optical                         
 	3   Not enabled                     
-	4   Fixed                           
+	4   Network                           
 	5   Fixed                           
 	6   Not enabled                     
 	7   Not enabled                     
@@ -65,5 +68,11 @@
 
 	1> TOOLBOX GET /AmigaTestKit.adf
 	/AmigaTestKit.adf: Block 220/220
+
+	1> TOOLBOX UNIT 4 WIFI
+	SSID   : network                                                         
+	RSSI   : -57
+	Channel: 1
+	Flags  : 0x0
 
 @ENDNODE MAIN

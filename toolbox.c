@@ -23,6 +23,7 @@ enum {
 	ARG_LCD,
 	ARG_SCD,
 	ARG_GET,
+	ARG_W,
 	ARG_NARG,
 };
 static LONG argsarray[ARG_NARG];
@@ -33,6 +34,15 @@ static LONG unit = 2;
 static struct MsgPort *msgport;
 static struct IOStdReq *ior;
 
+struct toolbox_wifi_network {
+	char  ssid[64];
+	char  bssid[6];
+	BYTE  rssi;
+	UBYTE channel;
+	UBYTE flags;
+	UBYTE padding;
+};
+
 __aligned union {
 	struct toolbox_file {
 		UBYTE index;
@@ -40,6 +50,10 @@ __aligned union {
 		char  name[33];
 		ULONG size;
 	} files[100];
+	struct {
+		USHORT size;
+		struct toolbox_wifi_network info;
+	} wifi_current;
 	UBYTE data[4096];
 } data;
 
@@ -72,7 +86,7 @@ int main(void)
 	argsarray[ARG_UNIT] = (LONG)&unit;
 
 	args = ReadArgs("DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,"
-			"LCD=LISTCDS/S,SCD=SETCD/N,GET",
+			"LCD=LISTCDS/S,SCD=SETCD/N,GET,W=WIFI/S",
 			argsarray, NULL);
 
 	if (args == NULL) {
@@ -84,7 +98,8 @@ int main(void)
 		   (argsarray[ARG_LF] != 0) +
 		   (argsarray[ARG_LCD] != 0) +
 		   (argsarray[ARG_SCD] != 0) +
-		   (argsarray[ARG_GET] != 0);
+		   (argsarray[ARG_GET] != 0) +
+		   (argsarray[ARG_W] != 0);
 
 	if (nactions == 0) {
 		Printf("Must specify an action\n");
@@ -150,6 +165,10 @@ int main(void)
 		command[1] = (UBYTE)*(LONG *)argsarray[ARG_SCD] - 1;
 	} else if (argsarray[ARG_GET]) {
 		command[0] = 0xD0;
+	} else if (argsarray[ARG_W]) {
+		command[0] = 0x1C;
+		command[1] = 0x04;
+		command[4] = sizeof(data.wifi_current);
 	}
 
 	scsicmd.scsi_Command = command;
@@ -266,6 +285,18 @@ int main(void)
 			}
 		}
 		Printf("\n");
+	} else if (argsarray[ARG_W]) {
+		struct toolbox_wifi_network *w = &data.wifi_current.info;
+
+		if (data.wifi_current.size != sizeof(*w)) {
+			Printf("Unknown size (%lu) returned\n", data.wifi_current.size);
+			return RETURN_ERROR;
+		}
+
+		Printf("SSID   : %-64s\n", w->ssid);
+		Printf("RSSI   : %ld\n", w->rssi);
+		Printf("Channel: %lu\n", w->channel);
+		Printf("Flags  : 0x%lx\n", w->flags);
 	}
 
 	return RETURN_OK;
