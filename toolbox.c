@@ -108,7 +108,8 @@ int main(void)
 		   (argsarray[ARG_LCD] != 0) +
 		   (argsarray[ARG_SCD] != 0) +
 		   (argsarray[ARG_GET] != 0) +
-		   (argsarray[ARG_W] != 0);
+		   (argsarray[ARG_W] != 0)  +
+		   0;
 
 	if (nactions == 0) {
 		Printf("Must specify an action\n");
