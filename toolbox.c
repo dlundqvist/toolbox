@@ -59,6 +59,15 @@ __aligned union {
 
 static UBYTE command[10];
 
+#define TOOLBOX_LIST_FILES     0xD0
+#define TOOLBOX_GET_FILE       0xD1
+#define TOOLBOX_LIST_CDS       0xD7
+#define TOOLBOX_SET_NEXT_CD    0xD8
+#define TOOLBOX_LIST_DEVICES   0xD9
+#define TOOLBOX_WIFI_CMD       0x1C
+
+#define TOOLBOX_WIFI_CMD_INFO         0x04
+
 static BPTR file;
 
 static const char * const devicetypes[] = {
@@ -155,19 +164,19 @@ int main(void)
 	ior->io_Length = sizeof(scsicmd);
 
 	if (argsarray[ARG_LD]) {
-		command[0] = 0xD9;
+		command[0] = TOOLBOX_LIST_DEVICES;
 	} else if (argsarray[ARG_LF]) {
-		command[0] = 0xD0;
+		command[0] = TOOLBOX_LIST_FILES;
 	} else if (argsarray[ARG_LCD]) {
-		command[0] = 0xD7;
+		command[0] = TOOLBOX_LIST_CDS;
 	} else if (argsarray[ARG_SCD]) {
-		command[0] = 0xD8;
+		command[0] = TOOLBOX_SET_NEXT_CD;
 		command[1] = (UBYTE)*(LONG *)argsarray[ARG_SCD] - 1;
 	} else if (argsarray[ARG_GET]) {
-		command[0] = 0xD0;
+		command[0] = TOOLBOX_LIST_FILES;
 	} else if (argsarray[ARG_W]) {
-		command[0] = 0x1C;
-		command[1] = 0x04;
+		command[0] = TOOLBOX_WIFI_CMD;
+		command[1] = TOOLBOX_WIFI_CMD_INFO;
 		command[4] = sizeof(data.wifi_current);
 	}
 
@@ -256,7 +265,7 @@ int main(void)
 		nblocks = (data.files[i].size / 4096) +
 			  (data.files[i].size % 4096 ? 1 : 0);
 
-		command[0] = 0xD1;
+		command[0] = TOOLBOX_GET_FILE;
 		command[1] = i;
 
 		for (i = 0; i < nblocks; i++) {
