@@ -50,6 +50,7 @@ __aligned union {
 		char  name[33];
 		ULONG size;
 	} files[100];
+	UBYTE devices[8];
 	struct {
 		USHORT size;
 		struct toolbox_wifi_network info;
@@ -224,7 +225,7 @@ int main(void)
 		Printf("------------------------------------\n");
 
 		for (i = 0; i < scsicmd.scsi_Actual; i++) {
-			UBYTE t = data.data[i];
+			UBYTE t = data.devices[i];
 			const char *s;
 
 			if (t < sizeof(devicetypes)/sizeof(devicetypes[0])) {
