@@ -304,10 +304,14 @@ int main(void)
 			return RETURN_ERROR;
 		}
 
-		Printf("SSID   : %-64s\n", w->ssid);
-		Printf("RSSI   : %ld\n", w->rssi);
-		Printf("Channel: %lu\n", w->channel);
-		Printf("Flags  : 0x%lx\n", w->flags);
+		if (w->ssid[0]) {
+			Printf("SSID   : %-64s\n", w->ssid);
+			Printf("RSSI   : %ld\n", w->rssi);
+			Printf("Channel: %lu\n", w->channel);
+			Printf("Flags  : 0x%lx\n", w->flags);
+		} else {
+			Printf("WiFi not connected\n");
+		}
 	}
 
 	return RETURN_OK;
