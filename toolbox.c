@@ -58,7 +58,29 @@ __aligned union {
 	UBYTE data[4096];
 } data;
 
-static UBYTE command[10];
+__aligned static union {
+	UBYTE cmd;
+	struct {
+		UBYTE cmd;
+		UBYTE index;
+		ULONG block;
+		UBYTE pad[4];
+	} get_file;
+	struct {
+		UBYTE cmd;
+		UBYTE index;
+		UBYTE pad[8];
+	} set_next_cd;
+	struct {
+		UBYTE cmd;
+		UBYTE subcmd;
+		UBYTE pad0;
+		UBYTE sizemsb;
+		UBYTE sizelsb;
+		UBYTE pad1[5];
+	} wifi;
+	UBYTE bytes[10];
+} cdb;
 
 #define TOOLBOX_LIST_FILES     0xD0
 #define TOOLBOX_GET_FILE       0xD1
@@ -166,24 +188,25 @@ int main(void)
 	ior->io_Length = sizeof(scsicmd);
 
 	if (argsarray[ARG_LD]) {
-		command[0] = TOOLBOX_LIST_DEVICES;
+		cdb.cmd = TOOLBOX_LIST_DEVICES;
 	} else if (argsarray[ARG_LF]) {
-		command[0] = TOOLBOX_LIST_FILES;
+		cdb.cmd = TOOLBOX_LIST_FILES;
 	} else if (argsarray[ARG_LCD]) {
-		command[0] = TOOLBOX_LIST_CDS;
+		cdb.cmd = TOOLBOX_LIST_CDS;
 	} else if (argsarray[ARG_SCD]) {
-		command[0] = TOOLBOX_SET_NEXT_CD;
-		command[1] = (UBYTE)*(LONG *)argsarray[ARG_SCD] - 1;
+		cdb.cmd = TOOLBOX_SET_NEXT_CD;
+		cdb.set_next_cd.index = (UBYTE)*(LONG *)argsarray[ARG_SCD] - 1;
 	} else if (argsarray[ARG_GET]) {
-		command[0] = TOOLBOX_LIST_FILES;
+		cdb.cmd = TOOLBOX_LIST_FILES;
 	} else if (argsarray[ARG_W]) {
-		command[0] = TOOLBOX_WIFI_CMD;
-		command[1] = TOOLBOX_WIFI_CMD_INFO;
-		command[4] = sizeof(data.wifi_current);
+		cdb.cmd = TOOLBOX_WIFI_CMD;
+		cdb.wifi.subcmd = TOOLBOX_WIFI_CMD_INFO;
+		cdb.wifi.sizemsb = sizeof(data.wifi_current) >> 8;
+		cdb.wifi.sizelsb = sizeof(data.wifi_current);
 	}
 
-	scsicmd.scsi_Command = command;
-	scsicmd.scsi_CmdLength = sizeof(command);
+	scsicmd.scsi_Command = (UBYTE *)&cdb;
+	scsicmd.scsi_CmdLength = sizeof(cdb);
 	scsicmd.scsi_Data = (UWORD *)&data;
 	scsicmd.scsi_Length = sizeof(data);
 	scsicmd.scsi_Flags = SCSIF_READ;
@@ -267,13 +290,13 @@ int main(void)
 		nblocks = (data.files[i].size / 4096) +
 			  (data.files[i].size % 4096 ? 1 : 0);
 
-		command[0] = TOOLBOX_GET_FILE;
-		command[1] = i;
+		cdb.cmd = TOOLBOX_GET_FILE;
+		cdb.get_file.index = i;
 
 		for (i = 0; i < nblocks; i++) {
 			ULONG actual;
 
-			memcpy(&command[2], &i, 4);
+			cdb.get_file.block = i;
 
 			if (DoIO((struct IORequest *)ior)) {
 				Printf("Unable to send IO request: %ld\n",
