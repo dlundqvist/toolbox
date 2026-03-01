@@ -48,6 +48,7 @@ __aligned static union {
 		UBYTE index;
 		UBYTE isdir;
 		char  name[33];
+		UBYTE pad;
 		ULONG size;
 	} files[100];
 	UBYTE devices[8];
