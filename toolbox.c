@@ -43,7 +43,7 @@ struct toolbox_wifi_network {
 	UBYTE padding;
 };
 
-__aligned union {
+__aligned static union {
 	struct toolbox_file {
 		UBYTE index;
 		UBYTE isdir;
