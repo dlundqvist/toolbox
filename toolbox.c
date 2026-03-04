@@ -190,29 +190,34 @@ int main(void)
 	ior->io_Data = &scsicmd;
 	ior->io_Length = sizeof(scsicmd);
 
+	scsicmd.scsi_Command = (UBYTE *)&cdb;
+	scsicmd.scsi_CmdLength = sizeof(cdb);
+	scsicmd.scsi_Data = (UWORD *)&data;
+	scsicmd.scsi_Flags = SCSIF_READ;
+
 	if (argsarray[ARG_LD]) {
+		scsicmd.scsi_Length = sizeof(data.devices);
 		cdb.cmd = TOOLBOX_LIST_DEVICES;
 	} else if (argsarray[ARG_LF]) {
+		scsicmd.scsi_Length = sizeof(data.files);
 		cdb.cmd = TOOLBOX_LIST_FILES;
 	} else if (argsarray[ARG_LCD]) {
+		scsicmd.scsi_Length = sizeof(data.files);
 		cdb.cmd = TOOLBOX_LIST_CDS;
 	} else if (argsarray[ARG_SCD]) {
 		cdb.cmd = TOOLBOX_SET_NEXT_CD;
 		cdb.set_next_cd.index = (UBYTE)*(LONG *)argsarray[ARG_SCD] - 1;
 	} else if (argsarray[ARG_GET]) {
+		scsicmd.scsi_Length = sizeof(data.files);
 		cdb.cmd = TOOLBOX_LIST_FILES;
 	} else if (argsarray[ARG_W]) {
+		scsicmd.scsi_Length = sizeof(data.wifi_current);
 		cdb.cmd = TOOLBOX_WIFI_CMD;
 		cdb.wifi.subcmd = TOOLBOX_WIFI_CMD_INFO;
 		cdb.wifi.sizemsb = sizeof(data.wifi_current) >> 8;
 		cdb.wifi.sizelsb = sizeof(data.wifi_current);
 	}
 
-	scsicmd.scsi_Command = (UBYTE *)&cdb;
-	scsicmd.scsi_CmdLength = sizeof(cdb);
-	scsicmd.scsi_Data = (UWORD *)&data;
-	scsicmd.scsi_Length = sizeof(data);
-	scsicmd.scsi_Flags = SCSIF_READ;
 
 	if (DoIO((struct IORequest *)ior)) {
 		Printf("Unable to send IO request: %ld\n", ior->io_Error);
@@ -303,6 +308,7 @@ int main(void)
 		nblocks = (data.files[i].size / 4096) +
 			  (data.files[i].size % 4096 ? 1 : 0);
 
+		scsicmd.scsi_Length = sizeof(data.data);
 		cdb.cmd = TOOLBOX_GET_FILE;
 		cdb.get_file.index = i;
 
