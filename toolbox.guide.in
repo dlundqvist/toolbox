@@ -18,10 +18,12 @@
 	handling.
 
 	The LISTFILES option lists all files the SCSI emulator shares with
-	the host.
+	the host. If file is larger than or equal to 4GiB a + is shown
+	after size.
 
 	The LISTCDS option lists all CD image files that the SCSI emulator
-	can change to for the specified UNIT.
+	can change to for the specified UNIT. If image file is larger than
+	or equal to 4GiB a + is shown after size.
 
 	The SETCD option changes the SCSI emulator to use the specified CD
 	image index for the specified UNIT.
@@ -47,14 +49,14 @@
 	7   Not enabled                     
 
 	1> TOOLBOX DEVICE scsi.device UNIT 2 LF
-	Name                             Size      
-	-------------------------------------------
+	Name                             Size       
+	--------------------------------------------
 	AmigaTestKit.adf                 901120    
 	SysInfo.adf                      901120    
 
 	1> TOOLBOX LCD
-	Index  Name                             Size      
-	--------------------------------------------------
+	Index  Name                             Size       
+	---------------------------------------------------
 	1      CygnusEd_Pro_5.iso               37969920  
 	2      RoadshowCD.iso                   31037440  
 	3      AmigaOS3.2CD.iso                 77899776  

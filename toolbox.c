@@ -7,6 +7,8 @@
 #include <proto/dos.h>
 #include <proto/exec.h>
 
+#include <limits.h>
+
 #include <string.h>
 
 #include "toolbox_version.h"
@@ -48,7 +50,7 @@ __aligned static union {
 		UBYTE index;
 		UBYTE isdir;
 		char  name[33];
-		UBYTE pad;
+		UBYTE sizemsb;
 		ULONG size;
 	} files[100];
 	UBYTE devices[8];
@@ -221,26 +223,30 @@ int main(void)
 		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		ULONG i;
 
-		Printf("%-32s %-10s\n", "Name", "Size");
-		Printf("-------------------------------------------\n");
+		Printf("%-32s %-11s\n", "Name", "Size");
+		Printf("--------------------------------------------\n");
 
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
 
-			Printf("%-32s %-10ld\n", f->name, f->size);
+			Printf("%-32s %-10lu%s\n", f->name,
+						 f->sizemsb ? ULONG_MAX : f->size,
+						 f->sizemsb ? "+" : "");
 		}
 	} else if (argsarray[ARG_LCD]) {
 		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		ULONG i;
 
-		Printf("%-6s %-32s %-10s\n", "Index", "Name", "Size");
-		Printf("--------------------------------------------------\n");
+		Printf("%-6s %-32s %-11s\n", "Index", "Name", "Size");
+		Printf("---------------------------------------------------\n");
 
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
 
-			Printf("%-6ld %-32s %-10ld\n",
-			       f->index + 1, f->name, f->size);
+			Printf("%-6ld %-32s %-10lu%s\n",
+						 f->index + 1, f->name,
+						 f->sizemsb ? ULONG_MAX : f->size,
+						 f->sizemsb ? "+" : "");
 		}
 	} else if (argsarray[ARG_LD]) {
 		ULONG i;

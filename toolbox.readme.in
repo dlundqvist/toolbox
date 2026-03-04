@@ -16,6 +16,7 @@ Release 0.4
 -----------
 	- Fix return code in case of errors.
 	- Add command to show connected WiFi network.
+	- Indicate in file listings if file is larger than 4GiB.
 
 Release 0.3
 -----------
