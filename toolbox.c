@@ -287,6 +287,12 @@ int main(void)
 			return RETURN_ERROR;
 		}
 
+		if (data.files[i].sizemsb ||
+				data.files[i].size > INT_MAX) {
+			Printf("File too large (>%ld bytes)\n", INT_MAX);
+			return RETURN_ERROR;
+		}
+
 		file = Open((const char *)argsarray[ARG_GET], MODE_NEWFILE);
 
 		if (file == NULL) {

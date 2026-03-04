@@ -30,7 +30,7 @@
 
 	The GET option downloads specified file that's being shared from
 	the SCSI emulator. File can include path where the file will be
-	written.
+	written. Files larger than or equal to 2GiB cannot be downloaded.
 
 	The WIFI option show information about the currently connected WiFi
 	network.
