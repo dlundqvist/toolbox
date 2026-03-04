@@ -306,6 +306,10 @@ int main(void)
 		cdb.cmd = TOOLBOX_GET_FILE;
 		cdb.get_file.index = i;
 
+		Printf("%s: Block %ld/%ld",
+					 (const char *)argsarray[ARG_GET],
+					 0, nblocks);
+
 		for (i = 0; i < nblocks; i++) {
 			ULONG actual;
 
@@ -317,7 +321,7 @@ int main(void)
 				return RETURN_ERROR;
 			}
 
-			Printf("%s%s: Block %ld/%ld", i ? "\xd" : "",
+			Printf("\xd%s: Block %ld/%ld",
 			       (const char *)argsarray[ARG_GET],
 			       i + 1, nblocks);
 

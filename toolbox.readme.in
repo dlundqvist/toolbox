@@ -18,6 +18,7 @@ Release 0.4
 	- Add command to show connected WiFi network.
 	- Indicate in file listings if file is larger than 4GiB.
 	- Don't allow to GET files larger than or equal to 2GiB.
+	- Fix output issue when downloading empty files.
 
 Release 0.3
 -----------
