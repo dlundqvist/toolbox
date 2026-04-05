@@ -18,7 +18,7 @@ static UBYTE versiontag[] = VERSTAG;
 static struct RDArgs *args;
 
 #define ARGS_TEMPLATE "DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S," \
-			"LCD=LISTCDS/S,SCD=SETCD/N,GET"
+			"LCD=LISTCDS/S,SCD=SETCD/N,GET,CF=COUNTFILES/S,O=ODD/S,S=SHORT/S"
 
 enum {
 	ARG_DEVICE,
@@ -28,6 +28,9 @@ enum {
 	ARG_LCD,
 	ARG_SCD,
 	ARG_GET,
+	ARG_CF,
+	ARG_ODD,
+	ARG_SHORT,
 	ARG_NARG,
 };
 static LONG argsarray[ARG_NARG];
@@ -47,6 +50,8 @@ __aligned union {
 	} files[100];
 	UBYTE data[4096];
 } data;
+
+static UBYTE *datamem;
 
 static UBYTE command[10];
 
@@ -140,6 +145,7 @@ int main(void)
 {
 	struct SCSICmd scsicmd;
 	int nactions;
+	int oddaddress = 0, shortlength = 0;
 
 	argsarray[ARG_DEVICE] = (LONG)device;
 	argsarray[ARG_UNIT] = (LONG)&unit;
@@ -179,6 +185,9 @@ int main(void)
 				case ARG_LF:
 				case ARG_LCD:
 				case ARG_SCD:
+				case ARG_CF:
+				case ARG_ODD:
+				case ARG_SHORT:
 					argsarray[i] = result[i];
 					break;
 			}
@@ -191,11 +200,14 @@ int main(void)
 		}
 	}
 
+	datamem = AllocMem(4097UL, 0UL);
+
 	nactions = (argsarray[ARG_LD] != 0) +
 		   (argsarray[ARG_LF] != 0) +
 		   (argsarray[ARG_LCD] != 0) +
 		   (argsarray[ARG_SCD] != 0) +
-		   (argsarray[ARG_GET] != 0);
+		   (argsarray[ARG_GET] != 0) +
+		   (argsarray[ARG_CF] != 0);
 	if (nactions == 0) {
 		tprintf("Must specify an action\n");
 		return RETURN_ERROR;
@@ -224,6 +236,8 @@ int main(void)
 
 	device = (const char *)argsarray[ARG_DEVICE];
 	unit = *(LONG *)argsarray[ARG_UNIT];
+	oddaddress = argsarray[ARG_ODD] != 0L;
+	shortlength = argsarray[ARG_SHORT] != 0L;
 
 	msgport = CreatePort(NULL, 0L);
 	if (msgport == NULL) {
@@ -244,7 +258,17 @@ int main(void)
 	ior->io_Command = HD_SCSICMD;
 	ior->io_Data = &scsicmd;
 	ior->io_Length = sizeof(scsicmd);
+
+	scsicmd.scsi_Command = command;
+	scsicmd.scsi_CmdLength = sizeof(command);
+	scsicmd.scsi_Data = (UWORD *)&datamem[oddaddress];
+	scsicmd.scsi_Length = sizeof(data);
+	scsicmd.scsi_Flags = SCSIF_READ;
+
+	memset(&datamem[0], 0xff, 4097);
+
 	if (argsarray[ARG_LD]) {
+		if (shortlength) scsicmd.scsi_Length = 255UL;
 		command[0] = 0xD9;
 	} else if (argsarray[ARG_LF]) {
 		command[0] = 0xD0;
@@ -255,17 +279,17 @@ int main(void)
 		command[1] = (UBYTE)*(LONG *)argsarray[ARG_SCD] - 1;
 	} else if (argsarray[ARG_GET]) {
 		command[0] = 0xD0;
+	} else if (argsarray[ARG_CF]) {
+		if (shortlength) scsicmd.scsi_Length = 255UL;
+		command[0] = 0xD2;
 	}
-	scsicmd.scsi_Command = command;
-	scsicmd.scsi_CmdLength = sizeof(command);
-	scsicmd.scsi_Data = (UWORD *)&data;
-	scsicmd.scsi_Length = sizeof(data);
-	scsicmd.scsi_Flags = SCSIF_READ;
 
 	if (DoIO((struct IORequest *)ior)) {
 		tprintf("Unable to send IO request: %ld\n", ior->io_Error);
 		return RETURN_ERROR;
 	}
+
+	memcpy(data.data, &datamem[oddaddress], scsicmd.scsi_Actual);
 
 	if (argsarray[ARG_LF]) {
 		int i, nfiles;
@@ -305,6 +329,7 @@ int main(void)
 	} else if (argsarray[ARG_GET]) {
 		ULONG i, nfiles;
 		ULONG nblocks;
+		ULONG bytesleft;
 		const char *fpart = (const char *)argsarray[ARG_GET];
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		if (DOSBase->dl_lib.lib_Version >= 36) {
@@ -330,17 +355,28 @@ int main(void)
 		nblocks = (data.files[i].size / 4096) +
 			  (data.files[i].size % 4096 ? 1 : 0);
 
+		bytesleft = data.files[i].size;
+
 		command[0] = 0xD1;
 		command[1] = i;
 
 		for (i = 0; i < nblocks; i++) {
 			ULONG actual;
 			memcpy(&command[2], &i, 4);
+			if (shortlength) {
+				if (i + 1 == nblocks) {
+					scsicmd.scsi_Length = bytesleft;
+				} else {
+					scsicmd.scsi_Length = 4096;
+				}
+			}
 			if (DoIO((struct IORequest *)ior)) {
 				tprintf("Unable to send IO request: %ld\n",
 				       ior->io_Error);
 				return RETURN_ERROR;
 			}
+
+			memcpy(data.data, &datamem[oddaddress], scsicmd.scsi_Actual);
 
 			tprintf("%s%s: Block %ld/%ld", i ? "\xd" : "",
 			       (const char *)argsarray[ARG_GET],
@@ -354,8 +390,11 @@ int main(void)
 				DeleteFile((const char *)argsarray[ARG_GET]);
 				return RETURN_ERROR;
 			}
+			bytesleft -= actual;
 		}
 		tprintf("\n");
+	} else if (argsarray[ARG_CF]) {
+		tprintf("%ld %ld\n", scsicmd.scsi_Actual, data.data[0]);
 	}
 
 	return RETURN_OK;
@@ -387,4 +426,7 @@ void _STD_cleanup(void)
 		struct cstr_node *cs = (struct cstr_node *)RemHead(&cstrs);
 		FreeMem(cs, sizeof(*cs) + cs->len + 1);
 	}
+
+	if (datamem)
+		FreeMem(datamem, 4097UL);
 }
