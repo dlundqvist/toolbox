@@ -9,6 +9,7 @@
 
 #include <limits.h>
 
+#include <stdarg.h>
 #include <string.h>
 
 #include "toolbox_version.h"
@@ -116,6 +117,29 @@ static const char * const devicetypes[] = {
 	"Network",
 	"ZIP100",
 };
+
+struct rawdofmt_data {
+	char *b;
+};
+
+static void __asm rawdofmt_putch(register __d0 char c,
+																 register __a3 struct rawdofmt_data *d) {
+	*d->b++ = c;
+}
+
+static void tprintf(STRPTR fmt, ...) {
+	__aligned static char buffer[1025];
+	struct rawdofmt_data d = {buffer};
+	va_list ap;
+	int len;
+	va_start(ap, fmt);
+	RawDoFmt(fmt, (APTR)ap, rawdofmt_putch, (APTR)&d);
+	va_end(ap);
+	len = d.b - buffer;
+	if (len) {
+		Write(Output(), buffer, len - 1);
+	}
+}
 
 int main(void)
 {
