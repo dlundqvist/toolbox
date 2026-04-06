@@ -88,7 +88,7 @@ int main(void)
 	int nactions;
 
 	if (DOSBase->dl_lib.lib_Version < 36) {
-		Printf("dos.library v36 or later is required\n");
+		tprintf("dos.library v36 or later is required\n");
 		return RETURN_ERROR;
 	}
 
@@ -109,28 +109,28 @@ int main(void)
 		   (argsarray[ARG_SCD] != 0) +
 		   (argsarray[ARG_GET] != 0);
 	if (nactions == 0) {
-		Printf("Must specify an action\n");
+		tprintf("Must specify an action\n");
 		return RETURN_ERROR;
 	}
 	if (nactions != 1) {
-		Printf("Must specify at most one action\n");
+		tprintf("Must specify at most one action\n");
 		return RETURN_ERROR;
 	}
 
 	if (!*(const char *)argsarray[ARG_DEVICE]) {
-		Printf("DEVICE must not be empty\n");
+		tprintf("DEVICE must not be empty\n");
 		return RETURN_ERROR;
 	}
 
 	if (argsarray[ARG_GET] &&
 	    !*(const char *)argsarray[ARG_GET]) {
-		Printf("GET must not be empty\n");
+		tprintf("GET must not be empty\n");
 		return RETURN_ERROR;
 	}
 
 	if (argsarray[ARG_SCD] &&
 			!(UBYTE)*(LONG *)argsarray[ARG_SCD]) {
-		Printf("SETCD index must be greater than 0\n");
+		tprintf("SETCD index must be greater than 0\n");
 		return RETURN_ERROR;
 	}
 
@@ -139,17 +139,17 @@ int main(void)
 
 	msgport = CreateMsgPort();
 	if (msgport == NULL) {
-		Printf("Unable to create message port\n");
+		tprintf("Unable to create message port\n");
 		return RETURN_ERROR;
 	}
 	ior = (struct IOStdReq *)CreateIORequest(msgport, sizeof(*ior));
 	if (ior == NULL) {
-		Printf("Unable to create IO request\n");
+		tprintf("Unable to create IO request\n");
 		return RETURN_ERROR;
 	}
 
 	if(OpenDevice(device, unit, (struct IORequest *)ior, 0L)) {
-		Printf("Unable to open device %s unit %ld\n", device, unit);
+		tprintf("Unable to open device %s unit %ld\n", device, unit);
 		return RETURN_ERROR;
 	}
 
@@ -175,33 +175,33 @@ int main(void)
 	scsicmd.scsi_Flags = SCSIF_READ;
 
 	if (DoIO((struct IORequest *)ior)) {
-		Printf("Unable to send IO request: %ld\n", ior->io_Error);
+		tprintf("Unable to send IO request: %ld\n", ior->io_Error);
 		return RETURN_ERROR;
 	}
 
 	if (argsarray[ARG_LF]) {
 		int i, nfiles;
-		Printf("%-32s %-10s\n", "Name", "Size");
-		Printf("-------------------------------------------\n");
+		tprintf("%-32s %-10s\n", "Name", "Size");
+		tprintf("-------------------------------------------\n");
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
-			Printf("%-32s %-10ld\n", f->name, f->size);
+			tprintf("%-32s %-10ld\n", f->name, f->size);
 		}
 	} else if (argsarray[ARG_LCD]) {
 		int i, nfiles;
-		Printf("%-6s %-32s %-10s\n", "Index", "Name", "Size");
-		Printf("--------------------------------------------------\n");
+		tprintf("%-6s %-32s %-10s\n", "Index", "Name", "Size");
+		tprintf("--------------------------------------------------\n");
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
-			Printf("%-6ld %-32s %-10ld\n",
+			tprintf("%-6ld %-32s %-10ld\n",
 			       f->index + 1, f->name, f->size);
 		}
 	} else if (argsarray[ARG_LD]) {
 		int i;
-		Printf("%-3s %-32s\n", "ID", "Type");
-		Printf("------------------------------------\n");
+		tprintf("%-3s %-32s\n", "ID", "Type");
+		tprintf("------------------------------------\n");
 		for (i = 0; i < scsicmd.scsi_Actual; i++) {
 			UBYTE t = data.data[i];
 			const char *s;
@@ -212,7 +212,7 @@ int main(void)
 			} else {
 				s = "Unknown";
 			}
-			Printf("%-3ld %-32s\n", i, s);
+			tprintf("%-3ld %-32s\n", i, s);
 		}
 	} else if (argsarray[ARG_GET]) {
 		ULONG i, nfiles;
@@ -227,7 +227,7 @@ int main(void)
 			}
 		}
 		if (i == nfiles) {
-			Printf("File \"%s\" not found\n", fpart);
+			tprintf("File \"%s\" not found\n", fpart);
 			return RETURN_ERROR;
 		}
 
@@ -248,12 +248,12 @@ int main(void)
 			ULONG actual;
 			memcpy(&command[2], &i, 4);
 			if (DoIO((struct IORequest *)ior)) {
-				Printf("Unable to send IO request: %ld\n",
+				tprintf("Unable to send IO request: %ld\n",
 				       ior->io_Error);
 				return RETURN_ERROR;
 			}
 
-			Printf("%s%s: Block %ld/%ld", i ? "\xd" : "",
+			tprintf("%s%s: Block %ld/%ld", i ? "\xd" : "",
 			       (const char *)argsarray[ARG_GET],
 			       i + 1, nblocks);
 
@@ -267,7 +267,7 @@ int main(void)
 				return RETURN_ERROR;
 			}
 		}
-		Printf("\n");
+		tprintf("\n");
 	}
 
 	return RETURN_OK;
