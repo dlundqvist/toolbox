@@ -142,7 +142,7 @@ int main(void)
 		tprintf("Unable to create message port\n");
 		return RETURN_ERROR;
 	}
-	ior = (struct IOStdReq *)CreateIORequest(msgport, sizeof(*ior));
+	ior = (struct IOStdReq *)CreateExtIO(msgport, sizeof(*ior));
 	if (ior == NULL) {
 		tprintf("Unable to create IO request\n");
 		return RETURN_ERROR;
@@ -281,7 +281,7 @@ void _STD_cleanup(void)
 	if (ior) {
 		if (ior->io_Device)
 			CloseDevice((struct IORequest *)ior);
-		DeleteIORequest(ior);
+		DeleteExtIO((struct IORequest *)ior);
 	}
 
 	if (msgport)
