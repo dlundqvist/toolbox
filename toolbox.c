@@ -147,7 +147,7 @@ int main(void)
 	int nactions;
 
 	if (DOSBase->dl_lib.lib_Version < 36) {
-		Printf("dos.library v36 or later is required\n");
+		tprintf("dos.library v36 or later is required\n");
 		return RETURN_ERROR;
 	}
 
@@ -173,29 +173,29 @@ int main(void)
 		   0;
 
 	if (nactions == 0) {
-		Printf("Must specify an action\n");
+		tprintf("Must specify an action\n");
 		return RETURN_ERROR;
 	}
 
 	if (nactions != 1) {
-		Printf("Must specify at most one action\n");
+		tprintf("Must specify at most one action\n");
 		return RETURN_ERROR;
 	}
 
 	if (!*(const char *)argsarray[ARG_DEVICE]) {
-		Printf("DEVICE must not be empty\n");
+		tprintf("DEVICE must not be empty\n");
 		return RETURN_ERROR;
 	}
 
 	if (argsarray[ARG_GET] &&
 	    !*(const char *)argsarray[ARG_GET]) {
-		Printf("GET must not be empty\n");
+		tprintf("GET must not be empty\n");
 		return RETURN_ERROR;
 	}
 
 	if (argsarray[ARG_SCD] &&
 			!(UBYTE)*(LONG *)argsarray[ARG_SCD]) {
-		Printf("SETCD index must be greater than 0\n");
+		tprintf("SETCD index must be greater than 0\n");
 		return RETURN_ERROR;
 	}
 
@@ -205,19 +205,19 @@ int main(void)
 	msgport = CreateMsgPort();
 
 	if (msgport == NULL) {
-		Printf("Unable to create message port\n");
+		tprintf("Unable to create message port\n");
 		return RETURN_ERROR;
 	}
 
 	ior = (struct IOStdReq *)CreateIORequest(msgport, sizeof(*ior));
 
 	if (ior == NULL) {
-		Printf("Unable to create IO request\n");
+		tprintf("Unable to create IO request\n");
 		return RETURN_ERROR;
 	}
 
 	if(OpenDevice(device, unit, (struct IORequest *)ior, 0L)) {
-		Printf("Unable to open device %s unit %ld\n", device, unit);
+		tprintf("Unable to open device %s unit %ld\n", device, unit);
 		return RETURN_ERROR;
 	}
 
@@ -259,7 +259,7 @@ int main(void)
 
 
 	if (DoIO((struct IORequest *)ior)) {
-		Printf("Unable to send IO request: %ld\n", ior->io_Error);
+		tprintf("Unable to send IO request: %ld\n", ior->io_Error);
 		return RETURN_ERROR;
 	}
 
@@ -267,36 +267,36 @@ int main(void)
 		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		ULONG i;
 
-		Printf("%-32s %-11s\n", "Name", "Size");
-		Printf("--------------------------------------------\n");
+		tprintf("%-32s %-11s\n", "Name", "Size");
+		tprintf("--------------------------------------------\n");
 
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
 
-			Printf("%-32s %-10lu%s\n", f->name,
-						 f->sizemsb ? ULONG_MAX : f->size,
-						 f->sizemsb ? "+" : "");
+			tprintf("%-32s %-10lu%s\n", f->name,
+							f->sizemsb ? ULONG_MAX : f->size,
+							f->sizemsb ? "+" : "");
 		}
 	} else if (argsarray[ARG_LCD]) {
 		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
 		ULONG i;
 
-		Printf("%-6s %-32s %-11s\n", "Index", "Name", "Size");
-		Printf("---------------------------------------------------\n");
+		tprintf("%-6s %-32s %-11s\n", "Index", "Name", "Size");
+		tprintf("---------------------------------------------------\n");
 
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
 
-			Printf("%-6ld %-32s %-10lu%s\n",
-						 f->index + 1, f->name,
-						 f->sizemsb ? ULONG_MAX : f->size,
-						 f->sizemsb ? "+" : "");
+			tprintf("%-6ld %-32s %-10lu%s\n",
+							f->index + 1, f->name,
+							f->sizemsb ? ULONG_MAX : f->size,
+							f->sizemsb ? "+" : "");
 		}
 	} else if (argsarray[ARG_LD]) {
 		ULONG i;
 
-		Printf("%-3s %-32s\n", "ID", "Type");
-		Printf("------------------------------------\n");
+		tprintf("%-3s %-32s\n", "ID", "Type");
+		tprintf("------------------------------------\n");
 
 		for (i = 0; i < scsicmd.scsi_Actual; i++) {
 			UBYTE t = data.devices[i];
@@ -310,7 +310,7 @@ int main(void)
 				s = "Unknown";
 			}
 
-			Printf("%-3ld %-32s\n", i, s);
+			tprintf("%-3ld %-32s\n", i, s);
 		}
 	} else if (argsarray[ARG_GET]) {
 		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
@@ -327,13 +327,13 @@ int main(void)
 		}
 
 		if (i == nfiles) {
-			Printf("File \"%s\" not found\n", fpart);
+			tprintf("File \"%s\" not found\n", fpart);
 			return RETURN_ERROR;
 		}
 
 		if (data.files[i].sizemsb ||
 				data.files[i].size > INT_MAX) {
-			Printf("File too large (>%ld bytes)\n", INT_MAX);
+			tprintf("File too large (>%ld bytes)\n", INT_MAX);
 			return RETURN_ERROR;
 		}
 
@@ -351,9 +351,9 @@ int main(void)
 		cdb.cmd = TOOLBOX_GET_FILE;
 		cdb.get_file.index = i;
 
-		Printf("%s: Block %ld/%ld",
-					 (const char *)argsarray[ARG_GET],
-					 0, nblocks);
+		tprintf("%s: Block %ld/%ld",
+						(const char *)argsarray[ARG_GET],
+						0, nblocks);
 
 		for (i = 0; i < nblocks; i++) {
 			ULONG actual;
@@ -361,14 +361,14 @@ int main(void)
 			cdb.get_file.block = i;
 
 			if (DoIO((struct IORequest *)ior)) {
-				Printf("Unable to send IO request: %ld\n",
-				       ior->io_Error);
+				tprintf("Unable to send IO request: %ld\n",
+								ior->io_Error);
 				return RETURN_ERROR;
 			}
 
-			Printf("\xd%s: Block %ld/%ld",
-			       (const char *)argsarray[ARG_GET],
-			       i + 1, nblocks);
+			tprintf("\xd%s: Block %ld/%ld",
+							(const char *)argsarray[ARG_GET],
+							i + 1, nblocks);
 
 			actual = scsicmd.scsi_Actual;
 
@@ -380,28 +380,28 @@ int main(void)
 				return RETURN_ERROR;
 			}
 		}
-		Printf("\n");
+		tprintf("\n");
 	} else if (argsarray[ARG_W]) {
 		struct toolbox_wifi_network *w = &data.wifi_current.info;
 
 		if (data.wifi_current.size != sizeof(*w)) {
-			Printf("Unknown size (%lu) returned\n", data.wifi_current.size);
+			tprintf("Unknown size (%lu) returned\n", data.wifi_current.size);
 			return RETURN_ERROR;
 		}
 
 		if (w->ssid[0]) {
-			Printf("SSID   : %-64s\n", w->ssid);
-			Printf("RSSI   : %ld\n", w->rssi);
-			Printf("Channel: %lu\n", w->channel);
-			Printf("Flags  : 0x%lx\n", w->flags);
+			tprintf("SSID   : %-64s\n", w->ssid);
+			tprintf("RSSI   : %ld\n", w->rssi);
+			tprintf("Channel: %lu\n", w->channel);
+			tprintf("Flags  : 0x%lx\n", w->flags);
 		} else {
-			Printf("WiFi not connected\n");
+			tprintf("WiFi not connected\n");
 		}
 	} else if (argsarray[ARG_SW]) {
 		int i, rounds = 0;
 
 		if (!data.wifi_scan_started) {
-			Printf("Unable to start WiFi scan (%ld)\n", data.wifi_scan_started);
+			tprintf("Unable to start WiFi scan (%ld)\n", data.wifi_scan_started);
 			return RETURN_ERROR;
 		}
 
@@ -410,14 +410,14 @@ int main(void)
 
 		do {
 				if (rounds == 125) {
-					Printf("Timeout while waiting for WiFi scan to complete\n");
+					tprintf("Timeout while waiting for WiFi scan to complete\n");
 					return RETURN_ERROR;
 				}
 				if (rounds) {
 					Delay(10);
 				}
 				if (DoIO((struct IORequest *)ior)) {
-					Printf("Unable to send IO request: %ld\n", ior->io_Error);
+					tprintf("Unable to send IO request: %ld\n", ior->io_Error);
 					return RETURN_ERROR;
 				}
 				rounds++;
@@ -429,12 +429,12 @@ int main(void)
 		cdb.wifi.sizelsb = (sizeof(data.wifi_scan) & 0x00ff);
 
 		if (DoIO((struct IORequest *)ior)) {
-			Printf("Unable to send IO request: %ld\n", ior->io_Error);
+			tprintf("Unable to send IO request: %ld\n", ior->io_Error);
 			return RETURN_ERROR;
 		}
 
-		Printf("%-32s %-4s %-7s\n", "SSID", "RSSI", "Channel");
-		Printf("---------------------------------------------\n");
+		tprintf("%-32s %-4s %-7s\n", "SSID", "RSSI", "Channel");
+		tprintf("---------------------------------------------\n");
 
 		for (i = 0; i < 10; i++) {
 			struct toolbox_wifi_network *w = &data.wifi_scan.network[i];
@@ -447,7 +447,7 @@ int main(void)
 				memcpy(&w->ssid[29], "...\0", 4);
 			}
 
-			Printf("%-32s %-4ld %-7ld\n", w->ssid, w->rssi, w->channel);
+			tprintf("%-32s %-4ld %-7ld\n", w->ssid, w->rssi, w->channel);
 		}
 	}
 
