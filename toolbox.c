@@ -99,7 +99,7 @@ int main(void)
 			"LCD=LISTCDS/S,SCD=SETCD/N,GET",
 			argsarray, NULL);
 	if (args == NULL) {
-		PrintFault(IoErr(), "Unable to read arguments");
+		tprintf("Unable to read arguments\n");
 		return RETURN_ERROR;
 	}
 
@@ -233,8 +233,7 @@ int main(void)
 
 		file = Open((const char *)argsarray[ARG_GET], MODE_NEWFILE);
 		if (file == NULL) {
-			PrintFault(IoErr(),
-				   "Unable to open file for writing");
+			tprintf("Unable to open file for writing\n");
 			return RETURN_ERROR;
 		}
 
@@ -259,8 +258,7 @@ int main(void)
 
 			actual = scsicmd.scsi_Actual;
 			if (Write(file, data.data, actual) != actual) {
-				PrintFault(IoErr(),
-					   "\nUnable to write to file");
+				tprintf("\nUnable to write to file\n");
 				Close(file);
 				file = NULL;
 				DeleteFile((const char *)argsarray[ARG_GET]);
