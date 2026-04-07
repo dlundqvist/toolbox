@@ -8,6 +8,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "toolbox_version.h"
@@ -15,6 +16,9 @@
 static UBYTE versiontag[] = VERSTAG;
 
 static struct RDArgs *args;
+
+#define ARGS_TEMPLATE "DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S," \
+			"LCD=LISTCDS/S,SCD=SETCD/N,GET"
 
 enum {
 	ARG_DEVICE,
@@ -82,25 +86,109 @@ static void tprintf(STRPTR fmt, ...) {
 	}
 }
 
+#define LIST_HEAD_INITIALIZER(l) {	\
+	(struct Node *)&(l).lh_Tail,	\
+	NULL,						  	\
+	(struct Node *)&(l)				\
+}
+
+static struct List bstrs = LIST_HEAD_INITIALIZER(bstrs);
+static struct List cstrs = LIST_HEAD_INITIALIZER(cstrs);
+
+struct bstr_node {
+	struct Node node;
+	SHORT pad;
+	char len;
+	char str[0];
+};
+
+BPTR mkbstr(char *s) {
+	int len = strlen(s);
+	struct bstr_node *bs;
+
+	bs = AllocMem(sizeof(*bs) + len, 0L);
+	bs->len = len;
+	memcpy(bs->str, s, len);
+	AddHead(&bstrs, &bs->node);
+	return MKBADDR(&bs->len);
+}
+
+struct cstr_node {
+	struct Node node;
+	int len;
+	char str[0];
+};
+
+struct bstr {
+	char len;
+	char str[0];
+};
+
+char *mkcstr(BPTR s) {
+	struct bstr *bs = BADDR(s);
+	struct cstr_node *cs = AllocMem(sizeof(*cs) + bs->len + 1, 0L);
+	cs->len = bs->len;
+	memcpy(cs->str, bs->str, cs->len);
+	cs->str[cs->len] = '\0';
+	AddHead(&cstrs, &cs->node);
+	return cs->str;
+}
+
+extern LONG dosbcpl(LONG *stack, LONG index, ...);
+
 int main(void)
 {
 	struct SCSICmd scsicmd;
 	int nactions;
 
-	if (DOSBase->dl_lib.lib_Version < 36) {
-		tprintf("dos.library v36 or later is required\n");
-		return RETURN_ERROR;
-	}
-
 	argsarray[ARG_DEVICE] = (LONG)device;
 	argsarray[ARG_UNIT] = (LONG)&unit;
 
-	args = ReadArgs("DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,"
-			"LCD=LISTCDS/S,SCD=SETCD/N,GET",
-			argsarray, NULL);
-	if (args == NULL) {
-		tprintf("Unable to read arguments\n");
-		return RETURN_ERROR;
+	if (DOSBase->dl_lib.lib_Version < 36) {
+#define STACKFRAME_SIZE	(368L >> 2L)
+#define RESULTARRAY_SIZE (656L >> 2L)
+		LONG stack[STACKFRAME_SIZE];
+		LONG result[RESULTARRAY_SIZE];
+		LONG success = 0, i;
+
+		success = dosbcpl(stack, 0x4E, mkbstr(ARGS_TEMPLATE),
+						  MKBADDR(result), 80);
+
+		if (success == DOSFALSE) {
+			tprintf("Unable to read arguments\n");
+			return RETURN_ERROR;
+		}
+
+		for (i = 0; i < ARG_NARG; i++) {
+			if (result[i] == DOSFALSE) {
+				continue;
+			}
+
+			switch (i) {
+				static LONG unit;
+				case ARG_DEVICE:
+				case ARG_GET:
+					argsarray[i] = (LONG)mkcstr(result[i]);
+					break;
+				case ARG_UNIT:
+					/* FIXME: detect error */
+					unit = atol(mkcstr(result[i]));
+					argsarray[i] = (LONG)&unit;
+					break;
+				case ARG_LD:
+				case ARG_LF:
+				case ARG_LCD:
+				case ARG_SCD:
+					argsarray[i] = result[i];
+					break;
+			}
+		}
+	} else {
+		args = ReadArgs(ARGS_TEMPLATE, argsarray, NULL);
+		if (args == NULL) {
+			tprintf("Unable to read arguments\n");
+			return RETURN_ERROR;
+		}
 	}
 
 	nactions = (argsarray[ARG_LD] != 0) +
@@ -217,9 +305,11 @@ int main(void)
 	} else if (argsarray[ARG_GET]) {
 		ULONG i, nfiles;
 		ULONG nblocks;
-		const char *fpart;
+		const char *fpart = (const char *)argsarray[ARG_GET];
 		nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
-		fpart = FilePart((const char *)argsarray[ARG_GET]);
+		if (DOSBase->dl_lib.lib_Version >= 36) {
+			fpart = FilePart(fpart);
+		}
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
 			if (!strcmp(fpart, f->name)) {
@@ -287,4 +377,14 @@ void _STD_cleanup(void)
 
 	if (args)
 		FreeArgs(args);
+
+	while (!IsListEmpty(&bstrs)) {
+		struct bstr_node *bs = (struct bstr_node *)RemHead(&bstrs);
+		FreeMem(bs, sizeof(*bs) + bs->len);
+	}
+
+	while (!IsListEmpty(&cstrs)) {
+		struct cstr_node *cs = (struct cstr_node *)RemHead(&cstrs);
+		FreeMem(cs, sizeof(*cs) + cs->len + 1);
+	}
 }

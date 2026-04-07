@@ -1,10 +1,14 @@
 TOOLBOX_DEPS=toolbox_version.h toolbox_rev.h
+TOOLBOX_OBJS=toolbox.o dosbcpl.o
 
-toolbox: toolbox.o
-	sc nover obj $< pname $@ link noicons
+toolbox: $(TOOLBOX_OBJS)
+	sc nover obj $(TOOLBOX_OBJS) pname $@ link noicons
 
 toolbox.o: toolbox.c $(TOOLBOX_DEPS) toolbox.gst
 	sc nover gst toolbox.gst nostkchk csrc $< objname $@
+
+dosbcpl.o: dosbcpl.a
+	sc nover asm $< objname $@
 
 toolbox.readme: toolbox.readme.in $(TOOLBOX_DEPS)
 	sc nover pponly csrc $< objname $@
@@ -16,7 +20,7 @@ toolbox.gst: gst.c
 	sc nover mgst $@ csrc $< noobjname noicons
 
 clean:
-	-delete ALL toolbox.gst toolbox.o toolbox.lnk toolbox \
+	-delete ALL toolbox.gst $(TOOLBOX_OBJS) toolbox.lnk toolbox \
                 toolbox.readme toolbox.guide toolbox.lha lha
 
 toolbox.lha: toolbox toolbox.guide

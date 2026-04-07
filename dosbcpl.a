@@ -1,0 +1,19 @@
+	XREF _DOSBase
+	XDEF _dosbcpl
+	SECTION code
+_dosbcpl:
+	MOVEM.L D2-D7/A2-A6,-(A7)
+	MOVEA.L	_DOSBase,A5
+	MOVEM.L	42(A5),A2/A5-A6
+	MOVEA.L	48(A7),A1
+	MOVEM.L	52(A7),D5
+	MOVEM.L	56(sp),D1-D4
+	MOVEQ   #12,D0
+	SUBA.L  A0,A0
+	ASL.W   #2,D5
+	MOVEA.L	0(A2,D5.W),A4
+	JSR	    (A5)
+	MOVE.L  D1,D0
+	MOVEM.L	(A7)+,D2-D7/A2-A6
+	RTS
+	END
