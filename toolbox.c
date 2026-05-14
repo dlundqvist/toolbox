@@ -4,6 +4,7 @@
 #include <dos/dos.h>
 #include <exec/exec.h>
 
+#include <proto/alib.h>
 #include <proto/dos.h>
 #include <proto/exec.h>
 
@@ -202,7 +203,7 @@ int main(void)
 	device = (const char *)argsarray[ARG_DEVICE];
 	unit = *(LONG *)argsarray[ARG_UNIT];
 
-	msgport = CreateMsgPort();
+	msgport = CreatePort(NULL, 0L);
 
 	if (msgport == NULL) {
 		tprintf("Unable to create message port\n");
@@ -466,7 +467,7 @@ void _STD_cleanup(void)
 	}
 
 	if (msgport)
-		DeleteMsgPort(msgport);
+		DeletePort(msgport);
 
 	if (args)
 		FreeArgs(args);
