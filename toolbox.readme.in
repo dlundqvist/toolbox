@@ -4,7 +4,7 @@ Author: daniel@malarhojden.nu (Daniel Lundqvist)
 Uploader: daniel@malarhojden.nu (Daniel Lundqvist)
 Version: MAKEVERSION(VERSION,REVISION)
 Type: disk/misc
-Architecture: m68k-amigaos >= 2.04
+Architecture: m68k-amigaos >= 1.3
 
 toolbox is a utility for SCSI emulators, such as ZuluSCSI and BlueSCSI.
 
@@ -20,6 +20,7 @@ Release 0.4
 	- Indicate in file listings if file is larger than 4GiB.
 	- Don't allow to GET files larger than or equal to 2GiB.
 	- Fix output issue when downloading empty files.
+	- Fixed incompatibilities with Kickstart 1.3.
 
 Release 0.3
 -----------

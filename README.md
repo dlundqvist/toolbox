@@ -4,7 +4,7 @@ Utility to list shared files, CD images, change CD etc.
 
 ## Requirements
 
-AmigaOS 2.x and 68000 with a SCSI emulator, such as ZuluSCSI or BlueSCSI.
+AmigaOS 1.3+ and 68000 with a SCSI emulator, such as ZuluSCSI or BlueSCSI.
 
 ## Build
 
