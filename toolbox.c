@@ -160,7 +160,7 @@ int main(void)
 			argsarray, NULL);
 
 	if (args == NULL) {
-		PrintFault(IoErr(), "Unable to read arguments");
+		tprintf("Unable to read arguments: error %ld\n", IoErr());
 		return RETURN_ERROR;
 	}
 
@@ -341,7 +341,7 @@ int main(void)
 		file = Open((const char *)argsarray[ARG_GET], MODE_NEWFILE);
 
 		if (file == NULL) {
-			PrintFault(IoErr(), "Unable to open file for writing");
+			tprintf("Unable to open file for writing: error %ld\n", IoErr());
 			return RETURN_ERROR;
 		}
 
@@ -374,7 +374,7 @@ int main(void)
 			actual = scsicmd.scsi_Actual;
 
 			if (Write(file, data.data, actual) != actual) {
-				PrintFault(IoErr(), "\nUnable to write to file");
+				tprintf("\nUnable to write to file: error %ld\n", IoErr());
 				Close(file);
 				file = NULL;
 				DeleteFile((const char *)argsarray[ARG_GET]);
