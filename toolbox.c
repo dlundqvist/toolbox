@@ -410,9 +410,18 @@ int main(void)
 		}
 	} else if (argsarray[ARG_GET]) {
 		ULONG nfiles = scsicmd.scsi_Actual / sizeof(struct toolbox_file);
-		const char *fpart = FilePart((const char *)argsarray[ARG_GET]);
+		const char *fpart = (const char *)argsarray[ARG_GET];
 		ULONG i;
 		ULONG nblocks;
+
+		if (DOSBase->dl_lib.lib_Version >= 36) {
+			fpart = FilePart(fpart);
+		} else {
+			const char *lslash = strrchr(fpart, '/');
+			if (lslash) {
+				fpart = lslash + 1;
+			}
+		}
 
 		for (i = 0; i < nfiles; i++) {
 			struct toolbox_file *f = &data.files[i];
