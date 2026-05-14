@@ -1,0 +1,24 @@
+	INCLUDE "dos/dosextens.i"
+
+	XREF _DOSBase
+
+	XDEF _dosbcpl
+
+	SECTION code
+
+_dosbcpl:
+	MOVEM.L D2-D7/A2-A6,-(A7)		; Save clobbered registers
+	MOVEA.L	_DOSBase,A5
+	MOVEM.L	dl_A2(A5),A2/A5-A6	; Retrieve BCPL standard register values
+	MOVEA.L	48(A7),A1						; BCPL stack pointer
+	MOVEM.L	52(A7),D5						; BCPL global vector index
+	MOVEM.L	56(A7),D1-D4				; BCPL function arguments
+	MOVEQ   #12,D0							; Reserve 3 LONGs for A1/A3-A4 stored in A1
+	SUBA.L  A0,A0								; Base system address space (0)
+	ASL.W   #2,D5								; Global vector index to table offset
+	MOVEA.L	0(A2,D5.W),A4				; Load function pointer from global vector
+	JSR	    (A5)								; Jump to BCPL servicing code
+	MOVE.L  D1,D0								; Propagate return value
+	MOVEM.L	(A7)+,D2-D7/A2-A6		; Restore saved registers
+	RTS
+	END

@@ -189,6 +189,8 @@ char *mkcstr(BPTR s) {
 	return cs->str;
 }
 
+extern LONG dosbcpl(LONG *stack, LONG index, ...);
+
 int main(void)
 {
 	struct SCSICmd scsicmd;

@@ -3,6 +3,7 @@ SCOPTIONS
 # KEEP IN SYNC WITH clean TARGET
 toolbox.gst
 toolbox.o
+dosbcpl.o
 toolbox.lnk
 toolbox
 toolbox.readme
