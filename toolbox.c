@@ -11,6 +11,7 @@
 #include <limits.h>
 
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "toolbox_version.h"
@@ -18,6 +19,17 @@
 static UBYTE versiontag[] = VERSTAG;
 
 static struct RDArgs *args;
+
+#define ARGS_TEMPLATE	\
+ "DEVICE,"						\
+ "UNIT/N,"						\
+ "LD=LISTDEVICES/S,"	\
+ "LF=LISTFILES/S,"		\
+ "LCD=LISTCDS/S,"			\
+ "SCD=SETCD/N,"				\
+ "GET,"								\
+ "W=WIFI/S,"					\
+ "SW=SCANWIFI/S"
 
 enum {
 	ARG_DEVICE,
@@ -196,21 +208,55 @@ int main(void)
 	struct SCSICmd scsicmd;
 	int nactions;
 
-	if (DOSBase->dl_lib.lib_Version < 36) {
-		tprintf("dos.library v36 or later is required\n");
-		return RETURN_ERROR;
-	}
-
 	argsarray[ARG_DEVICE] = (LONG)device;
 	argsarray[ARG_UNIT] = (LONG)&unit;
 
-	args = ReadArgs("DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,"
-			"LCD=LISTCDS/S,SCD=SETCD/N,GET,W=WIFI/S,SW=SCANWIFI/S",
-			argsarray, NULL);
+	if (DOSBase->dl_lib.lib_Version >= 36) {
+		args = ReadArgs(ARGS_TEMPLATE, argsarray, NULL);
 
-	if (args == NULL) {
-		tprintf("Unable to read arguments: error %ld\n", IoErr());
-		return RETURN_ERROR;
+		if (args == NULL) {
+			tprintf("Unable to read arguments: error %ld\n", IoErr());
+			return RETURN_ERROR;
+		}
+	} else {
+		static __aligned LONG stack[91];
+		static __aligned LONG result[164];
+		LONG success, i;
+
+		success = dosbcpl(stack, 0x4E, mkbstr(ARGS_TEMPLATE),
+											MKBADDR(result), 80);
+
+		if (success == DOSFALSE) {
+			tprintf("Unable to read arguments: error %ld\n", IoErr());
+			return RETURN_ERROR;
+		}
+
+		for (i = 0; i < ARG_NARG; i++) {
+			if (result[i] == DOSFALSE) {
+				continue;
+			}
+
+			switch (i) {
+				static LONG nresult[ARG_NARG];
+				case ARG_DEVICE:
+				case ARG_GET:
+					argsarray[i] = (LONG)mkcstr(result[i]);
+					break;
+				case ARG_UNIT:
+				case ARG_SCD:
+					/* FIXME: detect error */
+					nresult[i] = atol(mkcstr(result[i]));
+					argsarray[i] = (LONG)&nresult[i];
+					break;
+				case ARG_LD:
+				case ARG_LF:
+				case ARG_LCD:
+				case ARG_W:
+				case ARG_SW:
+					argsarray[i] = result[i];
+					break;
+			}
+		}
 	}
 
 	nactions = (argsarray[ARG_LD] != 0) +
