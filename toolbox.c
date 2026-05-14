@@ -142,6 +142,53 @@ static void tprintf(STRPTR fmt, ...) {
 	}
 }
 
+#define LIST_HEAD_INITIALIZER(l) {	\
+	(struct Node *)&(l).lh_Tail,			\
+	NULL,															\
+	(struct Node *)&(l)								\
+}
+
+static struct List bstrs = LIST_HEAD_INITIALIZER(bstrs);
+static struct List cstrs = LIST_HEAD_INITIALIZER(cstrs);
+
+struct bstr {
+	char len;
+	char str[0];
+};
+
+struct bstr_node {
+	struct Node node;
+	SHORT pad;
+	struct bstr bstr;
+};
+
+BPTR mkbstr(char *s) {
+	int len = strlen(s);
+	struct bstr_node *bs;
+
+	bs = AllocMem(sizeof(*bs) + len, 0L);
+	bs->bstr.len = len;
+	memcpy(bs->bstr.str, s, len);
+	AddHead(&bstrs, &bs->node);
+	return MKBADDR(&bs->bstr);
+}
+
+struct cstr_node {
+	struct Node node;
+	int len;
+	char str[0];
+};
+
+char *mkcstr(BPTR s) {
+	struct bstr *bs = BADDR(s);
+	struct cstr_node *cs = AllocMem(sizeof(*cs) + bs->len + 1, 0L);
+	cs->len = bs->len;
+	memcpy(cs->str, bs->str, cs->len);
+	cs->str[cs->len] = '\0';
+	AddHead(&cstrs, &cs->node);
+	return cs->str;
+}
+
 int main(void)
 {
 	struct SCSICmd scsicmd;
@@ -471,4 +518,14 @@ void _STD_cleanup(void)
 
 	if (args)
 		FreeArgs(args);
+
+	while (!IsListEmpty(&bstrs)) {
+		struct bstr_node *bs = (struct bstr_node *)RemHead(&bstrs);
+		FreeMem(bs, sizeof(*bs) + bs->bstr.len);
+	}
+
+	while (!IsListEmpty(&cstrs)) {
+		struct cstr_node *cs = (struct cstr_node *)RemHead(&cstrs);
+		FreeMem(cs, sizeof(*cs) + cs->len + 1);
+	}
 }
