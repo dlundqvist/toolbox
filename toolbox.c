@@ -26,6 +26,7 @@ enum {
 	ARG_SCD,
 	ARG_GET,
 	ARG_W,
+	ARG_SW,
 	ARG_NARG,
 };
 static LONG argsarray[ARG_NARG];
@@ -58,6 +59,12 @@ __aligned static union {
 		USHORT size;
 		struct toolbox_wifi_network info;
 	} wifi_current;
+	UBYTE wifi_scan_started;
+	UBYTE wifi_scan_completed;
+	struct {
+		USHORT size;
+		struct toolbox_wifi_network network[10];
+	} wifi_scan;
 	UBYTE data[4096];
 } data;
 
@@ -92,6 +99,9 @@ __aligned static union {
 #define TOOLBOX_LIST_DEVICES   0xD9
 #define TOOLBOX_WIFI_CMD       0x1C
 
+#define TOOLBOX_WIFI_CMD_SCAN         0x01
+#define TOOLBOX_WIFI_CMD_COMPLETE     0x02
+#define TOOLBOX_WIFI_CMD_SCAN_RESULTS 0x03
 #define TOOLBOX_WIFI_CMD_INFO         0x04
 
 static BPTR file;
@@ -121,7 +131,7 @@ int main(void)
 	argsarray[ARG_UNIT] = (LONG)&unit;
 
 	args = ReadArgs("DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,"
-			"LCD=LISTCDS/S,SCD=SETCD/N,GET,W=WIFI/S",
+			"LCD=LISTCDS/S,SCD=SETCD/N,GET,W=WIFI/S,SW=SCANWIFI/S",
 			argsarray, NULL);
 
 	if (args == NULL) {
@@ -135,6 +145,7 @@ int main(void)
 		   (argsarray[ARG_SCD] != 0) +
 		   (argsarray[ARG_GET] != 0) +
 		   (argsarray[ARG_W] != 0)  +
+		   (argsarray[ARG_SW] != 0) +
 		   0;
 
 	if (nactions == 0) {
@@ -216,6 +227,10 @@ int main(void)
 		cdb.wifi.subcmd = TOOLBOX_WIFI_CMD_INFO;
 		cdb.wifi.sizemsb = sizeof(data.wifi_current) >> 8;
 		cdb.wifi.sizelsb = sizeof(data.wifi_current);
+	} else if (argsarray[ARG_SW]) {
+		scsicmd.scsi_Length = sizeof(data.wifi_scan_started);
+		cdb.cmd = TOOLBOX_WIFI_CMD;
+		cdb.wifi.subcmd = TOOLBOX_WIFI_CMD_SCAN;
 	}
 
 
@@ -357,6 +372,58 @@ int main(void)
 			Printf("Flags  : 0x%lx\n", w->flags);
 		} else {
 			Printf("WiFi not connected\n");
+		}
+	} else if (argsarray[ARG_SW]) {
+		int i, rounds = 0;
+
+		if (!data.wifi_scan_started) {
+			Printf("Unable to start WiFi scan (%ld)\n", data.wifi_scan_started);
+			return RETURN_ERROR;
+		}
+
+		scsicmd.scsi_Length = sizeof(data.wifi_scan_completed);
+		cdb.wifi.subcmd = TOOLBOX_WIFI_CMD_COMPLETE;
+
+		do {
+				if (rounds == 125) {
+					Printf("Timeout while waiting for WiFi scan to complete\n");
+					return RETURN_ERROR;
+				}
+				if (rounds) {
+					Delay(10);
+				}
+				if (DoIO((struct IORequest *)ior)) {
+					Printf("Unable to send IO request: %ld\n", ior->io_Error);
+					return RETURN_ERROR;
+				}
+				rounds++;
+		} while (!data.wifi_scan_completed);
+
+		scsicmd.scsi_Length = sizeof(data.wifi_scan);
+		cdb.wifi.subcmd = TOOLBOX_WIFI_CMD_SCAN_RESULTS;
+		cdb.wifi.sizemsb = (sizeof(data.wifi_scan) & 0xff00) >> 8;
+		cdb.wifi.sizelsb = (sizeof(data.wifi_scan) & 0x00ff);
+
+		if (DoIO((struct IORequest *)ior)) {
+			Printf("Unable to send IO request: %ld\n", ior->io_Error);
+			return RETURN_ERROR;
+		}
+
+		Printf("%-32s %-4s %-7s\n", "SSID", "RSSI", "Channel");
+		Printf("---------------------------------------------\n");
+
+		for (i = 0; i < 10; i++) {
+			struct toolbox_wifi_network *w = &data.wifi_scan.network[i];
+
+			if (w->ssid[0] == 0) {
+				break;
+			}
+
+			if (strlen(w->ssid) > 32) {
+				memcpy(&w->ssid[29], "...\0", 4);
+			}
+
+			Printf("%-32s %-4ld %-7ld\n", w->ssid, w->rssi, w->channel);
 		}
 	}
 

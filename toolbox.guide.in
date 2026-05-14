@@ -8,7 +8,7 @@
 
     FORMAT
         DEVICE,UNIT/N,LD=LISTDEVICES/S,LF=LISTFILES/S,LCD=LISTCDS/S,
-	SCD=SETCD/N,GET,W=WIFI/S
+	SCD=SETCD/N,GET,W=WIFI/S,SW=SCANWIFI/S
 
     FUNCTION
 	The DEVICE option specifies which device to open, and UNIT which
@@ -34,6 +34,8 @@
 
 	The WIFI option show information about the currently connected WiFi
 	network.
+
+	The SCANWIFI option scans WiFi and shows found networks.
 
     EXAMPLES
 	1> TOOLBOX LISTDEVICES
@@ -76,5 +78,11 @@
 	RSSI   : -57
 	Channel: 1
 	Flags  : 0x0
+
+	1> TOOLBOX UNIT 4 SCANWIFI
+	SSID                             RSSI Channel
+	---------------------------------------------
+	network                          -55  12
+	network2                         -90  1
 
 @ENDNODE MAIN
