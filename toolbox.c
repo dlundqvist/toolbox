@@ -135,12 +135,14 @@ struct rawdofmt_data {
 	char *b;
 };
 
-static void __saveds __asm rawdofmt_putch(register __d0 char c,
-																					register __a3 struct rawdofmt_data *d) {
+static void __saveds __asm
+rawdofmt_putch(register __d0 char c,
+							 register __a3 struct rawdofmt_data *d) {
 	*d->b++ = c;
 }
 
-static void tprintf(STRPTR fmt, ...) {
+static void
+tprintf(STRPTR fmt, ...) {
 	__aligned static char buffer[1025];
 	struct rawdofmt_data d = {buffer};
 	va_list ap;
@@ -174,7 +176,8 @@ struct bstr_node {
 	struct bstr bstr;
 };
 
-BPTR mkbstr(char *s) {
+BPTR
+mkbstr(char *s) {
 	int len = strlen(s);
 	struct bstr_node *bs;
 
@@ -191,7 +194,8 @@ struct cstr_node {
 	char str[0];
 };
 
-char *mkcstr(BPTR s) {
+char *
+mkcstr(BPTR s) {
 	struct bstr *bs = BADDR(s);
 	struct cstr_node *cs = AllocMem(sizeof(*cs) + bs->len + 1, 0L);
 	cs->len = bs->len;
@@ -203,7 +207,8 @@ char *mkcstr(BPTR s) {
 
 extern LONG dosbcpl(LONG *stack, LONG index, ...);
 
-int main(void)
+int
+main(void)
 {
 	struct SCSICmd scsicmd;
 	int nactions;
@@ -559,7 +564,8 @@ int main(void)
 	return RETURN_OK;
 }
 
-void _STD_cleanup(void)
+void
+_STD_cleanup(void)
 {
 	if (file)
 		Close(file);
