@@ -135,8 +135,8 @@ struct rawdofmt_data {
 	char *b;
 };
 
-static void __asm rawdofmt_putch(register __d0 char c,
-																 register __a3 struct rawdofmt_data *d) {
+static void __saveds __asm rawdofmt_putch(register __d0 char c,
+																					register __a3 struct rawdofmt_data *d) {
 	*d->b++ = c;
 }
 
