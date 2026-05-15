@@ -16,7 +16,7 @@
 
 #include "toolbox_version.h"
 
-static UBYTE versiontag[] = VERSTAG;
+UBYTE versiontag[] = VERSTAG;
 
 static struct RDArgs *args;
 
